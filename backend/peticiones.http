@@ -1,0 +1,5 @@
+### Estado de la API
+GET http://localhost:3000/api/estado
+
+### Ruta pendiente
+GET http://localhost:3000/api/eventos
