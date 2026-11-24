@@ -1,5 +1,4 @@
-.logo-utp {
-  width: 160px;
-  max-width: 100%;
-  height: auto;
+:host {
+  display: block;
+  min-height: 100dvh;
 }

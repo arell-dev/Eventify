@@ -1,5 +1,238 @@
+@font-face {
+  font-display: swap;
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 200 800;
+  src: url('/fonts/manrope-latin-variable.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Source Sans 3';
+  font-style: normal;
+  font-weight: 200 900;
+  src: url('/fonts/source-sans-3-latin-variable.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light;
+  --color-principal: #8b0021;
+  --color-principal-hover: #b50d30;
+  --color-acento: #b50d30;
+  --color-foco: #8b0021;
+  --color-fondo: #f9f6f6;
+  --color-superficie: #ffffff;
+  --color-texto: #1f1b1c;
+  --color-texto-secundario: #5b4040;
+  --color-borde: #e3d6d7;
+  --color-superficie-suave: #fbf1f2;
+  --color-acento-suave: #ffedec;
+  --color-confirmada: #146c2e;
+  --color-confirmada-suave: #dcfce7;
+  --color-cancelada: #5b4040;
+  --color-cancelada-suave: #e9e0e1;
+  --color-texto-inactivo: #7c7576;
+  --color-error: #ba1a1a;
+  --color-error-suave: #ffdad6;
+  --color-advertencia: #92400e;
+  --color-advertencia-suave: #fef3c7;
+  --color-exito: #146c2e;
+  --bs-primary: var(--color-principal);
+  --bs-primary-rgb: 139, 0, 33;
+  --bs-body-bg: var(--color-fondo);
+  --bs-body-color: var(--color-texto);
+  --bs-body-font-family: 'Instrument Sans', 'Source Sans 3', 'Segoe UI', sans-serif;
+  --bs-border-color: var(--color-borde);
+  --bs-link-color: var(--color-principal);
+  --bs-link-hover-color: var(--color-principal-hover);
+  --bs-focus-ring-color: rgb(139 0 33 / 25%);
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-fondo);
+}
+
 body {
-  color: #00143d;
-  background-color: #edf3fb;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--color-texto);
+  background-color: var(--color-fondo);
+  font-family: 'Instrument Sans', 'Source Sans 3', 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.indicador-valor {
+  font-family: 'Wix Madefor Display', 'Manrope', 'Segoe UI', sans-serif;
+}
+
+:where(a, button, input, select, textarea, [tabindex='0']):focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: 3px;
+}
+
+.card {
+  --bs-card-bg: var(--color-superficie);
+  --bs-card-border-color: var(--color-borde);
+  --bs-card-border-radius: 0.5rem;
+}
+
+.alert-danger {
+  --bs-alert-color: var(--color-error);
+  --bs-alert-bg: var(--color-error-suave);
+  --bs-alert-border-color: #efc6c1;
+}
+
+.alert-warning {
+  --bs-alert-color: var(--color-advertencia);
+  --bs-alert-bg: var(--color-advertencia-suave);
+  --bs-alert-border-color: #ecd8b5;
+}
+
+.estado-inscripcion {
+  display: inline-flex;
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.dato-secundario {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+}
+
+.estado-confirmada {
+  background: var(--color-confirmada-suave);
+  color: var(--color-confirmada);
+}
+
+.estado-cancelada {
+  background: var(--color-cancelada-suave);
+  color: var(--color-cancelada);
+}
+
+.btn-reintentar {
+  min-height: 44px;
+  padding: 0.25rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-principal);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.btn-principal,
+.btn-secundario,
+.btn-peligro,
+.btn-peligro-secundario {
+  min-height: 44px;
+}
+
+.btn-principal {
+  border-color: var(--color-acento);
+  background: var(--color-acento);
+  color: #ffffff;
+}
+
+.btn-principal:is(:hover, :focus-visible, :active) {
+  border-color: #920b27;
+  background: #920b27;
+  color: #ffffff;
+}
+
+.btn-secundario {
+  border-color: var(--color-borde);
+  background: var(--color-superficie);
+  color: var(--color-principal);
+}
+
+.btn-secundario:is(:hover, :focus-visible, :active) {
+  border-color: var(--color-principal);
+  background: #edf2f8;
+  color: var(--color-principal);
+}
+
+.btn-peligro {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: #ffffff;
+}
+
+.btn-peligro:is(:hover, :focus-visible, :active) {
+  border-color: #8f1d16;
+  background: #8f1d16;
+  color: #ffffff;
+}
+
+.btn-peligro-secundario {
+  border-color: var(--color-error);
+  background: var(--color-superficie);
+  color: var(--color-error);
+}
+
+.btn-peligro-secundario:is(:hover, :focus-visible, :active) {
+  background: var(--color-error-suave);
+  color: #8f1d16;
+}
+
+.form-control,
+.form-select {
+  min-height: 44px;
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-foco);
+  box-shadow: 0 0 0 0.2rem rgb(139 0 33 / 18%);
+}
+
+.form-select[aria-invalid='true'],
+.form-control[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.form-select[aria-invalid='true']:focus,
+.form-control[aria-invalid='true']:focus {
+  box-shadow: 0 0 0 0.2rem rgb(186 26 26 / 18%);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--color-principal);
+  --bs-btn-border-color: var(--color-borde);
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: var(--color-principal);
+  --bs-btn-hover-border-color: var(--color-principal);
+  --bs-btn-active-bg: var(--color-principal);
+  --bs-btn-active-border-color: var(--color-principal);
+  --bs-btn-disabled-color: var(--color-texto-secundario);
+  --bs-btn-disabled-border-color: var(--color-borde);
+}
+
+.btn-outline-danger {
+  --bs-btn-color: var(--color-error);
+  --bs-btn-border-color: #e3a29b;
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: var(--color-error);
+  --bs-btn-hover-border-color: var(--color-error);
+  --bs-btn-active-bg: #8f1d16;
+  --bs-btn-active-border-color: #8f1d16;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

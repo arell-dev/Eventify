@@ -1,0 +1,19 @@
+<div #contenedor class="contenedor-avisos" popover="manual" role="region" aria-label="Notificaciones">
+  @for (aviso of avisos(); track aviso.id) {
+    <article class="aviso-toast" [class.aviso-exito]="aviso.tipo === 'exito'" [class.aviso-error]="aviso.tipo === 'error'" [class.aviso-informacion]="aviso.tipo === 'informacion'">
+      <div class="contenido-aviso">
+        @if (aviso.titulo) {
+          <strong>{{ aviso.titulo }}</strong>
+        }
+        @if (aviso.tipo === 'error') {
+          <p role="alert" aria-live="assertive">{{ aviso.mensaje }}</p>
+        } @else {
+          <p role="status" aria-live="polite">{{ aviso.mensaje }}</p>
+        }
+      </div>
+      <button class="cerrar-toast" type="button" [attr.aria-label]="'Cerrar aviso: ' + aviso.mensaje" (click)="cerrar(aviso.id)">
+        <span aria-hidden="true">×</span>
+      </button>
+    </article>
+  }
+</div>

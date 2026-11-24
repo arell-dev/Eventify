@@ -1,0 +1,12 @@
+<dialog #dialogo class="dialogo-confirmacion" aria-labelledby="titulo-confirmacion" aria-describedby="mensaje-confirmacion" (cancel)="cancelarConEscape($event)">
+  <h2 id="titulo-confirmacion">Confirma la acción</h2>
+  <p id="mensaje-confirmacion">{{ confirmacion.mensaje() }}</p>
+  <div class="acciones-confirmacion">
+    <button class="btn btn-secundario" type="button" autofocus (click)="responder(false)">
+      Volver
+    </button>
+    <button class="btn btn-peligro" type="button" (click)="responder(true)">
+      Confirmar
+    </button>
+  </div>
+</dialog>

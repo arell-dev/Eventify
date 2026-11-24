@@ -1,0 +1,147 @@
+<section class="modulo-inscripciones modulo-lista">
+  <header class="encabezado-modulo">
+    <div class="introduccion-modulo">
+      <h1>Inscripciones</h1>
+      <p>Administra los usuarios inscritos en cada evento. Al cancelar una inscripción, el cupo se libera.</p>
+    </div>
+    <a class="btn btn-principal" routerLink="/admin/inscripciones/nueva">
+      <svg class="icono-boton" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 5v14m-7-7h14"></path>
+      </svg>
+      Inscribir usuario
+    </a>
+  </header>
+
+  <section class="resumen-inscripciones" role="group" aria-label="Filtrar inscripciones por estado">
+    <button class="card tarjeta-filtro d-flex flex-row align-items-center justify-content-between gap-3" [class.tarjeta-filtro-activa]="filtroEstado() === 'CONFIRMADA'" [attr.aria-pressed]="filtroEstado() === 'CONFIRMADA'" [disabled]="cargando() || errorCarga()" type="button" (click)="filtroEstado.set(filtroEstado() === 'CONFIRMADA' ? '' : 'CONFIRMADA')">
+      <span class="tarjeta-filtro-contenido">
+        <span class="tarjeta-filtro-titulo">Inscripciones confirmadas</span>
+        <strong class="indicador-valor indicador-confirmada">{{ confirmadas() | number }}</strong>
+      </span>
+      <svg class="icono-indicador icono-confirmada" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="m5 12 4 4L19 6"></path>
+      </svg>
+    </button>
+    <button class="card tarjeta-filtro d-flex flex-row align-items-center justify-content-between gap-3" [class.tarjeta-filtro-activa]="filtroEstado() === 'CANCELADA'" [attr.aria-pressed]="filtroEstado() === 'CANCELADA'" [disabled]="cargando() || errorCarga()" type="button" (click)="filtroEstado.set(filtroEstado() === 'CANCELADA' ? '' : 'CANCELADA')">
+      <span class="tarjeta-filtro-contenido">
+        <span class="tarjeta-filtro-titulo">Inscripciones canceladas</span>
+        <strong class="indicador-valor">{{ canceladas() | number }}</strong>
+      </span>
+      <svg class="icono-indicador" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="m9 9 6 6m0-6-6 6"></path>
+      </svg>
+    </button>
+  </section>
+
+  <section class="lista-inscripciones d-grid gap-4" aria-label="Lista de inscripciones">
+    <div class="encabezado-listado card">
+      <div class="card-body">
+        <div class="fila-filtros">
+          <div class="campo-busqueda">
+            <label class="form-label" for="buscar-inscripcion">Buscar por usuario o evento</label>
+            <div class="control-busqueda">
+              <svg class="icono-busqueda" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="10.8" cy="10.8" r="6.3"></circle>
+                <path d="m16 16 4.5 4.5"></path>
+              </svg>
+              <input id="buscar-inscripcion" class="form-control" type="search" placeholder="Nombre del usuario o título..." [value]="busqueda()" (input)="busqueda.set($any($event.target).value)">
+            </div>
+          </div>
+          <div class="campo-filtro campo-evento">
+            <label class="form-label" for="filtro-evento">Evento</label>
+            <select id="filtro-evento" class="form-select" [value]="filtroEvento()" [disabled]="cargandoEventos() || errorCargaEventos()" (change)="filtroEvento.set($any($event.target).value)">
+              <option value="">Todos los eventos</option>
+              @for (evento of eventos(); track evento.id) {
+                <option [value]="evento.id">{{ evento.titulo }}</option>
+              }
+            </select>
+            @if (errorCargaEventos()) {
+              <button class="btn-reintentar" type="button" (click)="cargarEventos()">Reintentar carga de eventos</button>
+            }
+          </div>
+          <div class="campo-filtro campo-estado">
+            <label class="form-label" for="filtro-estado">Estado</label>
+            <select id="filtro-estado" class="form-select" [value]="filtroEstado()" (change)="filtroEstado.set($any($event.target).value)">
+              <option value="">Todos los estados</option>
+              <option value="CONFIRMADA">Confirmada</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (cargando()) {
+      <div class="estado-listado card d-grid align-content-center gap-3 p-4" role="status" aria-label="Cargando inscripciones">
+        <div class="placeholder-wave d-grid gap-2" aria-hidden="true">
+          <span class="placeholder col-12 rounded-1 py-3"></span>
+          <span class="placeholder col-12 rounded-1 py-3"></span>
+          <span class="placeholder col-12 rounded-1 py-3"></span>
+        </div>
+        <span class="visually-hidden">Cargando inscripciones...</span>
+      </div>
+    } @else if (errorCarga()) {
+      <div class="estado-listado card d-grid align-content-center p-3">
+        <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3 mb-0" role="alert">
+          <span>No se pudo cargar la lista de inscripciones.</span>
+          <button class="btn btn-peligro-secundario" type="button" (click)="cargarInscripciones()">Reintentar</button>
+        </div>
+      </div>
+    } @else if (filtradas().length === 0) {
+      <div class="estado-listado card d-flex flex-column align-items-center justify-content-center gap-3 px-3 py-4 text-center" aria-live="polite">
+        <h2 class="mb-0 fs-5">{{ inscripciones().length === 0 ? 'Todavía no hay inscripciones' : 'No hay resultados' }}</h2>
+        <p class="mb-1 text-body-secondary">{{ inscripciones().length === 0 ? 'Inscribe un participante en un evento para comenzar.' : 'Prueba con otra búsqueda o filtro.' }}</p>
+        @if (inscripciones().length === 0) {
+          <a class="btn btn-principal" routerLink="/admin/inscripciones/nueva">Inscribir usuario</a>
+        }
+      </div>
+    } @else {
+      <div class="panel-resultados card overflow-hidden">
+        <div class="tabla-desktop table-responsive" tabindex="0" role="region" aria-label="Resultados de inscripciones. Desplázate horizontalmente para consultar todas las columnas.">
+          <table class="table table-hover align-middle tabla-inscripciones mb-0">
+            <caption class="visually-hidden">Inscripciones con participante, evento, fecha, estado y acciones disponibles.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Usuario inscrito</th>
+                <th scope="col">Evento</th>
+                <th scope="col">Fecha registro</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inscripcion of filtradas(); track inscripcion.id) {
+                <tr>
+                  <th scope="row">
+                    <span class="d-block text-break fw-semibold">{{ inscripcion.participanteNombre }}</span>
+                  </th>
+                  <td><span class="d-block text-break">{{ inscripcion.eventoTitulo }}</span></td>
+                  <td class="fecha-registro text-body-secondary">{{ formatearFecha(inscripcion.fechaRegistro) }}</td>
+                  <td>
+                    <span class="badge rounded-pill estado-inscripcion" [class.estado-confirmada]="inscripcion.estado === 'CONFIRMADA'" [class.estado-cancelada]="inscripcion.estado === 'CANCELADA'">{{ inscripcion.estado === 'CONFIRMADA' ? 'Confirmada' : 'Cancelada' }}</span>
+                  </td>
+                  <td>
+                    <div class="acciones-fila d-flex justify-content-end gap-1">
+                      @if (inscripcion.estado === 'CONFIRMADA') {
+                        <button class="btn btn-sm btn-secundario" [attr.aria-label]="'Cancelar inscripción de ' + inscripcion.participanteNombre" type="button" [disabled]="procesando()" (click)="cambiarEstado(inscripcion, 'CANCELADA')">Cancelar</button>
+                      } @else {
+                        <button class="btn btn-sm btn-principal" [attr.aria-label]="'Reactivar inscripción de ' + inscripcion.participanteNombre" type="button" [disabled]="procesando()" (click)="cambiarEstado(inscripcion, 'CONFIRMADA')">Reactivar</button>
+                        <button class="btn btn-sm boton-eliminar" [attr.aria-label]="'Eliminar inscripción de ' + inscripcion.participanteNombre" title="Eliminar inscripción" type="button" [disabled]="procesando()" (click)="eliminar(inscripcion)">
+                          <svg class="icono-eliminar" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4 7h16m-10 4v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"></path>
+                          </svg>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </section>
+</section>

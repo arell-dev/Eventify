@@ -1,0 +1,41 @@
+.dialogo-confirmacion {
+  width: min(32rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 0.5rem;
+  color: var(--color-texto);
+}
+
+.dialogo-confirmacion::backdrop {
+  background: rgb(31 27 28 / 40%);
+}
+
+.dialogo-confirmacion h2 {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.dialogo-confirmacion p {
+  margin-bottom: 1.5rem;
+  overflow-wrap: anywhere;
+}
+
+.acciones-confirmacion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.acciones-confirmacion .btn {
+  min-height: 44px;
+}
+
+@media (max-width: 575px) {
+  .acciones-confirmacion {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-confirmacion .btn {
+    width: 100%;
+  }
+}

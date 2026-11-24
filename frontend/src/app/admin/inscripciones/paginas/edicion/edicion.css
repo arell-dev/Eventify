@@ -1,0 +1,114 @@
+.modulo-inscripciones {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.volver-detalle {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--color-principal);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.volver-detalle:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.encabezado-edicion {
+  max-width: 760px;
+  margin-bottom: 1.25rem;
+}
+
+.encabezado-edicion h1 {
+  margin-bottom: 0;
+  color: var(--color-texto);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.016em;
+}
+
+.panel-edicion {
+  max-width: 760px;
+  border-color: var(--color-borde);
+  border-radius: 0.5rem;
+  background: var(--color-superficie);
+}
+
+.panel-edicion .card-body {
+  padding: clamp(1rem, 3vw, 1.75rem);
+}
+
+.resumen-registro {
+  margin-bottom: 1.25rem;
+}
+
+.resumen-registro .list-group-item {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0;
+  border-color: var(--color-borde);
+}
+
+.etiqueta-resumen {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.resumen-registro dd {
+  overflow-wrap: anywhere;
+  margin-bottom: 0;
+  color: var(--color-texto);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.form-label {
+  color: var(--color-texto);
+  font-weight: 600;
+}
+
+.campo-obligatorio {
+  color: var(--color-error);
+}
+
+.mensaje-campo {
+  margin-top: 0.35rem;
+  color: var(--color-error);
+  font-size: 0.8125rem;
+}
+
+.acciones-edicion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.estado-carga.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 760px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 575px) {
+  .encabezado-edicion h1 {
+    font-size: 1.75rem;
+  }
+
+  .acciones-edicion {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-edicion .btn {
+    width: 100%;
+  }
+}

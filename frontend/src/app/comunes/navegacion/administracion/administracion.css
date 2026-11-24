@@ -1,0 +1,39 @@
+.estructura-administracion {
+  display: grid;
+  min-height: 100dvh;
+  grid-template-columns: 17.5rem minmax(0, 1fr);
+}
+
+.contenido-administracion {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 2.5rem);
+}
+
+.salto-contenido {
+  position: fixed;
+  z-index: 20;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  transform: translateY(-160%);
+  border-radius: 0.35rem;
+  background: var(--color-superficie);
+  color: var(--color-principal);
+  font-weight: 700;
+}
+
+.salto-contenido:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+@media (max-width: 991px) {
+  .estructura-administracion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contenido-administracion {
+    padding: 1rem;
+  }
+}
