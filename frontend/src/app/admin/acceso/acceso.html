@@ -1,0 +1,44 @@
+<main class="pagina-acceso container-fluid">
+  <section class="tarjeta-acceso card" aria-labelledby="titulo-acceso">
+    <a class="marca-acceso" href="/admin/acceso" aria-label="Eventos UTP, acceso administrativo">
+      <img src="/utp.svg" alt="Universidad Tecnológica del Perú" width="194" height="59">
+      <span>Eventos UTP</span>
+    </a>
+
+    <div class="encabezado-acceso">
+      <h1 id="titulo-acceso">Iniciar sesión en Eventos UTP</h1>
+      <p>Accede a la administración de eventos e inscripciones.</p>
+    </div>
+
+    <form [formGroup]="formulario" (ngSubmit)="ingresar()" novalidate>
+      @if (mensajeError()) {
+        <div class="alert alert-danger" role="alert">{{ mensajeError() }}</div>
+      }
+
+      <div class="mb-3">
+        <label class="form-label" for="usuario">Correo electrónico</label>
+        <input id="usuario" class="form-control" type="email" name="username" formControlName="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required [attr.aria-invalid]="mostrarError('usuario')" [attr.aria-describedby]="mostrarError('usuario') ? 'error-usuario' : null">
+        @if (mostrarError('usuario')) {
+          <div id="error-usuario" class="mensaje-campo">Ingresa un correo electrónico válido.</div>
+        }
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label" for="contrasena">Contraseña</label>
+        <input id="contrasena" class="form-control" type="password" name="password" formControlName="contrasena" autocomplete="current-password" required [attr.aria-invalid]="mostrarError('contrasena')" [attr.aria-describedby]="mostrarError('contrasena') ? 'error-contrasena' : null">
+        @if (mostrarError('contrasena')) {
+          <div id="error-contrasena" class="mensaje-campo">Ingresa tu contraseña.</div>
+        }
+      </div>
+
+      <button class="btn btn-principal w-100" type="submit" [disabled]="procesando()">
+        @if (procesando()) {
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          Ingresando...
+        } @else {
+          Iniciar sesión
+        }
+      </button>
+    </form>
+  </section>
+</main>

@@ -1,0 +1,110 @@
+<header class="barra-volver-inscripcion">
+  <a class="enlace-volver-inscripcion" routerLink="/admin/inscripciones">
+    <svg class="icono-volver" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m15 18-6-6 6-6M9 12h12"></path>
+    </svg>
+    Volver a Inscripciones
+  </a>
+</header>
+
+<section class="modulo-inscripciones formulario-inscripcion">
+  <header class="encabezado-formulario">
+    <h1>Inscribir usuario en evento</h1>
+    <p>Selecciona el evento con cupos disponibles y elige al participante directamente desde la lista de usuarios.</p>
+  </header>
+
+  @if (cargandoCatalogos()) {
+    <div class="estado-carga card d-flex align-items-center gap-3 p-4" role="status">
+      <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+      Cargando eventos y participantes...
+    </div>
+  } @else {
+    <section class="panel-formulario card" aria-label="Datos de la inscripción">
+      <div class="card-body">
+        <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+          <div class="campo-formulario">
+            <label class="form-label" for="eventoId">
+              Evento
+            </label>
+            <select id="eventoId" class="form-select" formControlName="eventoId" required [attr.aria-invalid]="mostrarError('eventoId')" [attr.aria-describedby]="mostrarError('eventoId') ? 'ayuda-evento error-evento' : 'ayuda-evento'">
+              <option value="">Selecciona un evento</option>
+              @for (evento of eventos(); track evento.id) {
+                <option [value]="evento.id" [disabled]="eventoNoDisponible(evento)">
+                  {{ evento.titulo }} — {{ evento.cuposDisponibles }} {{ evento.cuposDisponibles === 1 ? 'cupo disponible' : 'cupos disponibles' }}{{ eventoNoDisponible(evento) ? ' · No disponible' : '' }}
+                </option>
+              }
+            </select>
+            <div id="ayuda-evento" class="visually-hidden">Las inscripciones solo están disponibles antes del inicio y mientras queden cupos.</div>
+            @if (errorEventos()) {
+              <div class="alert alert-danger mt-3" role="alert">
+                No se pudieron cargar los eventos.
+                <button class="btn btn-peligro-secundario mt-2" type="button" (click)="cargarEventos()">Reintentar</button>
+              </div>
+            }
+            @if (mostrarError('eventoId')) {
+              <div id="error-evento" class="mensaje-campo" role="alert">Selecciona un evento.</div>
+            }
+          </div>
+
+          <fieldset class="campo-formulario campo-participante" [disabled]="guardando() || errorParticipantes() || participantes().length === 0">
+            <legend class="form-label">
+              Consultar y seleccionar usuario
+            </legend>
+            <div class="lista-participantes list-group">
+              @for (participante of participantes(); track participante.id) {
+                <label class="opcion-participante list-group-item" [class.opcion-participante-seleccionada]="formulario.controls.participanteId.value === participante.id.toString()">
+                  <input class="form-check-input" type="radio" name="participanteId" formControlName="participanteId" required [value]="participante.id.toString()" [id]="'participante-' + participante.id" [attr.aria-invalid]="mostrarError('participanteId')" [attr.aria-describedby]="mostrarError('participanteId') ? 'ayuda-participante error-participante' : 'ayuda-participante'">
+                  <span class="datos-participante">
+                    <span class="nombre-participante">{{ participante.nombre }}</span>
+                    <span class="dato-secundario">{{ participante.correo }} · {{ participante.carrera }}</span>
+                  </span>
+                </label>
+              } @empty {
+                <p class="estado-sin-participantes alert alert-light" role="status">No hay participantes registrados.</p>
+              }
+            </div>
+            <div id="ayuda-participante" class="visually-hidden">Elige a la persona que se inscribirá en el evento.</div>
+            @if (errorParticipantes()) {
+              <div class="alert alert-danger mt-3" role="alert">
+                No se pudieron cargar los participantes.
+                <button class="btn btn-peligro-secundario mt-2" type="button" (click)="cargarParticipantes()">Reintentar</button>
+              </div>
+            }
+            @if (mostrarError('participanteId')) {
+              <div id="error-participante" class="mensaje-campo" role="alert">Selecciona un participante.</div>
+            }
+          </fieldset>
+
+          @if (participanteSeleccionado(); as participante) {
+            <div class="resumen-participante" aria-live="polite">
+              <svg class="icono-resumen" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="m5 12 4 4L19 6"></path>
+              </svg>
+              <p>Usuario seleccionado: <strong>{{ participante.nombre }}</strong> ({{ participante.correo }}). Confirma que es la persona correcta antes de guardar.</p>
+            </div>
+          }
+
+          @if (eventos().length > 0 && !hayEventosDisponibles()) {
+            <p class="estado-sin-eventos alert alert-warning" role="status">No hay eventos futuros con cupos disponibles para registrar una inscripción.</p>
+          }
+
+          @if (eventos().length === 0 && !errorEventos()) {
+            <p class="estado-sin-eventos alert alert-light" role="status">No hay eventos disponibles.</p>
+          }
+
+          <div class="acciones-formulario">
+            <a class="btn btn-secundario" routerLink="/admin/inscripciones">Cancelar</a>
+            <button class="btn btn-principal" type="submit" [disabled]="guardando() || errorEventos() || errorParticipantes() || !hayEventosDisponibles() || participantes().length === 0">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                Registrando...
+              } @else {
+                Confirmar inscripción
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  }
+</section>

@@ -1,0 +1,115 @@
+<section class="modulo-inscripciones detalle-inscripcion">
+  <a class="volver-listado" routerLink="/admin/inscripciones">← Volver a inscripciones</a>
+
+  <header class="encabezado-detalle">
+    <h1>Detalle de inscripción</h1>
+    @if (inscripcion(); as registro) {
+      <span class="badge rounded-pill estado-inscripcion" [class.estado-confirmada]="registro.estado === 'CONFIRMADA'" [class.estado-cancelada]="registro.estado === 'CANCELADA'">
+        {{ registro.estado === 'CONFIRMADA' ? 'Confirmada' : 'Cancelada' }}
+      </span>
+    }
+  </header>
+
+  @if (cargando()) {
+    <div class="estado-carga alert alert-light" role="status">
+      <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+      Cargando inscripción...
+    </div>
+  } @else if (inscripcion(); as registro) {
+    <div class="rejilla-detalle">
+      <section class="panel-detalle card" aria-labelledby="titulo-participante">
+        <div class="card-body">
+          <h2 id="titulo-participante" class="card-title">Participante</h2>
+          <dl class="lista-datos">
+            <div>
+              <dt>Nombre completo</dt>
+              <dd>{{ registro.participanteNombre }}</dd>
+            </div>
+            <div>
+              <dt>Correo electrónico</dt>
+              <dd>{{ registro.participanteCorreo || 'No disponible' }}</dd>
+            </div>
+            <div>
+              <dt>Código de inscripción</dt>
+              <dd>#{{ registro.id }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="panel-detalle card" aria-labelledby="titulo-evento">
+        <div class="card-body">
+          <h2 id="titulo-evento" class="card-title">Evento</h2>
+          <dl class="lista-datos">
+            <div>
+              <dt>Nombre del evento</dt>
+              <dd>{{ registro.eventoTitulo }}</dd>
+            </div>
+            <div>
+              <dt>Fecha de inicio</dt>
+              <dd>
+                {{ registro.eventoInicio
+                  ? formatearFecha(registro.eventoInicio)
+                  : 'No disponible' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Fecha de fin</dt>
+              <dd>
+                {{ registro.eventoFin
+                  ? formatearFecha(registro.eventoFin)
+                  : 'No disponible' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Cupos disponibles</dt>
+              <dd>
+                {{ registro.cuposDisponibles ?? 'No disponible' }}
+                / {{ registro.cupoEvento ?? 'No disponible' }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="panel-detalle panel-registro card" aria-labelledby="titulo-registro">
+        <div class="card-body">
+          <h2 id="titulo-registro" class="card-title">Datos del registro</h2>
+          <dl class="lista-datos">
+            <div>
+              <dt>Fecha de inscripción</dt>
+              <dd>{{ formatearFecha(registro.fechaRegistro) }}</dd>
+            </div>
+            <div>
+              <dt>Estado actual</dt>
+              <dd>{{ registro.estado === 'CONFIRMADA' ? 'Confirmada' : 'Cancelada' }}</dd>
+            </div>
+          </dl>
+
+          <div class="acciones-detalle">
+            <a class="btn btn-principal" [routerLink]="['/admin/inscripciones', registro.id, 'editar']">
+              Editar estado
+            </a>
+            @if (registro.estado === 'CANCELADA') {
+              <button class="btn btn-peligro-secundario" type="button" [disabled]="procesando()" (click)="eliminar()">
+                @if (procesando()) {
+                  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                  Eliminando...
+                } @else {
+                  Eliminar registro
+                }
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  } @else {
+    <div class="estado-carga alert alert-danger" role="alert">
+      <span>No se pudo cargar esta inscripción.</span>
+      <button class="btn btn-peligro-secundario" type="button" (click)="reintentar()">
+        Reintentar
+      </button>
+    </div>
+  }
+</section>

@@ -1,3 +1,59 @@
 import { Routes } from '@angular/router';
+import { requiereSesionAdmin } from './comunes/sesion/sesion.guard';
 
-export const routes: Routes = [];
+// Reúne las rutas administrativas bajo el menú compartido.
+export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'admin/acceso'
+  },
+  {
+    path: 'admin/acceso',
+    title: 'Iniciar sesión | Eventos UTP',
+    loadComponent: () => import('./admin/acceso/acceso.component')
+      .then((modulo) => modulo.AccesoAdministrativoComponent)
+  },
+  {
+    path: 'admin',
+    title: 'Administración | Eventos UTP',
+    canActivate: [requiereSesionAdmin],
+    loadComponent: () => import('./comunes/navegacion/administracion/administracion.component')
+      .then((modulo) => modulo.AdministracionComponent),
+    children: [
+      {
+        path: 'inscripciones',
+        title: 'Inscripciones | Eventos UTP',
+        loadComponent: () => import('./admin/inscripciones/inscripciones.component')
+          .then((modulo) => modulo.InscripcionesComponent),
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            title: 'Inscripciones | Eventos UTP',
+            loadComponent: () => import('./admin/inscripciones/paginas/lista/lista.component')
+              .then((modulo) => modulo.InscripcionesListaComponent)
+          },
+          {
+            path: 'nueva',
+            title: 'Nueva inscripción | Eventos UTP',
+            loadComponent: () => import('./admin/inscripciones/paginas/formulario/formulario.component')
+              .then((modulo) => modulo.InscripcionFormularioComponent)
+          },
+          {
+            path: ':id/editar',
+            title: 'Editar inscripción | Eventos UTP',
+            loadComponent: () => import('./admin/inscripciones/paginas/edicion/edicion.component')
+              .then((modulo) => modulo.InscripcionEdicionComponent)
+          },
+          {
+            path: ':id',
+            title: 'Detalle de inscripción | Eventos UTP',
+            loadComponent: () => import('./admin/inscripciones/paginas/detalle/detalle.component')
+              .then((modulo) => modulo.InscripcionDetalleComponent)
+          }
+        ]
+      }
+    ]
+  }
+];

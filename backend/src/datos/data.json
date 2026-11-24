@@ -1,0 +1,84 @@
+{
+  "ponentes": [
+    {
+      "id": 1,
+      "nombre": "Andrea Salazar",
+      "correo": "andrea.salazar@utp.edu.pe",
+      "especialidad": "Desarrollo web"
+    },
+    {
+      "id": 2,
+      "nombre": "Diego Mendoza",
+      "correo": "diego.mendoza@utp.edu.pe",
+      "especialidad": "Inteligencia artificial"
+    }
+  ],
+  "participantes": [
+    {
+      "id": 1,
+      "nombre": "María López",
+      "correo": "maria.lopez@utp.edu.pe",
+      "carrera": "Ingeniería de Sistemas"
+    },
+    {
+      "id": 2,
+      "nombre": "Carlos Torres",
+      "correo": "carlos.torres@utp.edu.pe",
+      "carrera": "Ingeniería Industrial"
+    },
+    {
+      "id": 3,
+      "nombre": "Lucía Ramírez",
+      "correo": "lucia.ramirez@utp.edu.pe",
+      "carrera": "Administración de Empresas"
+    }
+  ],
+  "eventos": [
+    {
+      "id": 1,
+      "titulo": "Introducción a Angular 20",
+      "descripcion": "Taller práctico de componentes, servicios y formularios reactivos.",
+      "tipo": "TALLER",
+      "modalidad": "PRESENCIAL",
+      "lugar": "Auditorio UTP Piura",
+      "enlace": "",
+      "inicio": "2027-01-15T15:00:00.000Z",
+      "fin": "2027-01-15T18:00:00.000Z",
+      "cupo": 1,
+      "ponenteId": 1
+    },
+    {
+      "id": 2,
+      "titulo": "Inteligencia artificial aplicada",
+      "descripcion": "Casos de uso de IA en proyectos universitarios.",
+      "tipo": "CONFERENCIA",
+      "modalidad": "VIRTUAL",
+      "lugar": "",
+      "enlace": "https://meet.example.com/eventify-ia",
+      "inicio": "2027-02-10T16:00:00.000Z",
+      "fin": "2027-02-10T18:00:00.000Z",
+      "cupo": 40,
+      "ponenteId": 2
+    },
+    {
+      "id": 3,
+      "titulo": "Diseño de API REST",
+      "descripcion": "Buenas prácticas para diseñar servicios HTTP.",
+      "tipo": "TALLER",
+      "modalidad": "HIBRIDO",
+      "lugar": "Laboratorio de cómputo 2",
+      "enlace": "https://meet.example.com/eventify-api",
+      "inicio": "2027-03-08T14:00:00.000Z",
+      "fin": "2027-03-08T17:00:00.000Z",
+      "cupo": 25,
+      "ponenteId": 1
+    }
+  ],
+  "inscripciones": [],
+  "siguientesIds": {
+    "ponentes": 3,
+    "participantes": 4,
+    "eventos": 4,
+    "inscripciones": 1
+  }
+}

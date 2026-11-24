@@ -1,0 +1,294 @@
+.modulo-lista {
+  width: 100%;
+  max-width: 83rem;
+  margin: 0 auto;
+}
+
+.encabezado-modulo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.introduccion-modulo h1 {
+  margin-bottom: 0.25rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.introduccion-modulo p {
+  max-width: 44rem;
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+}
+
+.encabezado-modulo > .btn,
+.acciones-fila .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.encabezado-modulo > .btn {
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.icono-boton,
+.icono-indicador,
+.icono-busqueda {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.resumen-inscripciones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.625rem;
+}
+
+.estado-listado {
+  min-height: 11.5rem;
+}
+
+.card.tarjeta-filtro {
+  min-width: 0;
+  min-height: 5.75rem;
+  padding: 1rem;
+  color: var(--color-texto);
+  font: inherit;
+  text-align: left;
+}
+
+.tarjeta-filtro:hover:not(:disabled),
+.tarjeta-filtro-activa {
+  border-color: var(--color-principal);
+  background: var(--color-acento-suave);
+}
+
+.tarjeta-filtro:disabled {
+  opacity: 1;
+}
+
+.tarjeta-filtro-contenido {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.tarjeta-filtro-titulo {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.indicador-valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador-confirmada {
+  color: var(--color-confirmada);
+}
+
+.icono-indicador {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-texto-secundario);
+}
+
+.icono-confirmada {
+  color: var(--color-confirmada);
+}
+
+.fila-filtros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 1rem;
+}
+
+.campo-busqueda {
+  grid-column: span 2;
+}
+
+.campo-busqueda,
+.campo-filtro {
+  min-width: 0;
+}
+
+.campo-busqueda .form-label,
+.campo-filtro .form-label {
+  margin-bottom: 0.375rem;
+  color: var(--color-texto);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.control-busqueda {
+  position: relative;
+}
+
+.icono-busqueda {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  transform: translateY(-50%);
+  color: var(--color-texto-inactivo);
+  pointer-events: none;
+}
+
+.control-busqueda .form-control {
+  padding-left: 2.5rem;
+}
+
+.fila-filtros .form-control,
+.fila-filtros .form-select {
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+}
+
+.tabla-desktop:focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: -3px;
+}
+
+.tabla-inscripciones {
+  min-width: 50rem;
+  --bs-table-hover-bg: var(--color-superficie-suave);
+  --bs-table-border-color: var(--color-borde);
+}
+
+.tabla-inscripciones thead th {
+  padding: 0.75rem 1rem;
+  background: var(--color-superficie-suave);
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabla-inscripciones tbody th,
+.tabla-inscripciones tbody td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.fecha-registro {
+  font-family: 'Spline Sans Mono', 'Source Sans 3', monospace;
+  white-space: nowrap;
+}
+
+.acciones-fila .btn {
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.acciones-fila .btn-secundario {
+  border-color: var(--color-borde);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+}
+
+.acciones-fila .btn-secundario:is(:hover, :focus-visible, :active) {
+  border-color: var(--color-borde);
+  background: var(--color-error-suave);
+  color: var(--color-error);
+}
+
+.acciones-fila .boton-eliminar {
+  width: 2rem;
+  padding: 0.375rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-texto-secundario);
+}
+
+.acciones-fila .boton-eliminar:is(:hover, :focus-visible) {
+  background: var(--color-error-suave);
+  color: var(--color-error);
+}
+
+.icono-eliminar {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+@media (max-width: 991px) {
+  .fila-filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575px) {
+  .encabezado-modulo {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .introduccion-modulo h1 {
+    font-size: 1.75rem;
+  }
+
+  .encabezado-modulo > .btn,
+  .fila-filtros {
+    width: 100%;
+  }
+
+  .fila-filtros {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .campo-busqueda {
+    grid-column: auto;
+  }
+
+  .resumen-inscripciones {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+  }
+
+  .tarjeta-filtro {
+    min-height: 5.25rem;
+    padding: 0.75rem;
+  }
+
+  .tarjeta-filtro-titulo {
+    font-size: 0.6875rem;
+  }
+
+  .indicador-valor {
+    font-size: 1.375rem;
+  }
+
+}

@@ -1,0 +1,49 @@
+.pagina-acceso {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 1.5rem 1rem;
+}
+
+.tarjeta-acceso {
+  width: min(100%, 28rem);
+  gap: 1.5rem;
+  padding: clamp(1.5rem, 5vw, 2rem);
+}
+
+.marca-acceso {
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  color: var(--color-texto);
+  font-size: 1.1rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.marca-acceso img {
+  width: 12rem;
+  height: auto;
+}
+
+.encabezado-acceso h1 {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.encabezado-acceso p {
+  margin-bottom: 0;
+  color: var(--color-texto-secundario);
+}
+
+.form-label {
+  color: var(--color-texto);
+  font-weight: 600;
+}
+
+.mensaje-campo {
+  margin-top: 0.35rem;
+  color: var(--color-error);
+  font-size: 0.875rem;
+}

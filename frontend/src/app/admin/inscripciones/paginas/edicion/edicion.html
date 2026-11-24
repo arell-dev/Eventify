@@ -1,0 +1,81 @@
+<section class="modulo-inscripciones edicion-inscripcion">
+  @if (inscripcion(); as registro) {
+    <a class="volver-detalle" [routerLink]="['/admin/inscripciones', registro.id]">
+      ← Volver al detalle
+    </a>
+  }
+
+  <header class="encabezado-edicion">
+    <h1>Editar inscripción</h1>
+  </header>
+
+  @if (cargando()) {
+    <div class="estado-carga alert alert-light" role="status">
+      <span class="spinner-border spinner-border-sm text-primary" aria-hidden="true"></span>
+      Cargando inscripción...
+    </div>
+  } @else if (inscripcion(); as registro) {
+    <section class="panel-edicion card" aria-labelledby="titulo-formulario-edicion">
+      <div class="card-body">
+        <h2 id="titulo-formulario-edicion" class="visually-hidden">Datos de la inscripción</h2>
+        <dl class="resumen-registro list-group list-group-flush">
+          <div class="list-group-item">
+            <dt class="etiqueta-resumen">Participante</dt>
+            <dd>{{ registro.participanteNombre }}</dd>
+          </div>
+          <div class="list-group-item">
+            <dt class="etiqueta-resumen">Evento</dt>
+            <dd>{{ registro.eventoTitulo }}</dd>
+          </div>
+          <div class="list-group-item">
+            <dt class="etiqueta-resumen">Fecha de registro</dt>
+            <dd>{{ formatearFecha(registro.fechaRegistro) }}</dd>
+          </div>
+        </dl>
+
+        <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+          <div class="mb-4">
+            <label class="form-label" for="estado">
+              Estado de la inscripción <span class="campo-obligatorio" aria-hidden="true">*</span>
+              <span class="visually-hidden">Obligatorio</span>
+            </label>
+            <select id="estado" class="form-select" formControlName="estado" required [attr.aria-invalid]="mostrarError()" [attr.aria-describedby]="mostrarError() ? 'ayuda-estado error-estado' : 'ayuda-estado'">
+              <option value="CONFIRMADA">Confirmada</option>
+              <option value="CANCELADA">Cancelada</option>
+            </select>
+            <div id="ayuda-estado" class="form-text">
+              Cancelar libera un cupo. Solo se puede cancelar antes de que comience el evento.
+              Reactivar requiere que el evento siga siendo futuro y tenga disponibilidad.
+            </div>
+            @if (mostrarError()) {
+              <div id="error-estado" class="mensaje-campo" role="alert">
+                Selecciona un estado válido.
+              </div>
+            }
+          </div>
+
+          <div class="acciones-edicion">
+            <a class="btn btn-secundario" [routerLink]="['/admin/inscripciones', registro.id]">
+              Cancelar
+            </a>
+            <button class="btn btn-principal" type="submit" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                Guardando...
+              } @else {
+                Guardar cambios
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  } @else {
+    <div class="estado-carga alert alert-danger" role="alert">
+      <span>No se pudo cargar esta inscripción.</span>
+      <button class="btn btn-peligro-secundario" type="button" (click)="reintentar()">
+        Reintentar
+      </button>
+    </div>
+  }
+</section>

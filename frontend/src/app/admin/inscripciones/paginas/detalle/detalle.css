@@ -1,0 +1,127 @@
+.modulo-inscripciones {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.volver-listado {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--color-principal);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.volver-listado:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.encabezado-detalle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.encabezado-detalle h1 {
+  margin-bottom: 0;
+  color: var(--color-texto);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.016em;
+}
+
+.rejilla-detalle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.panel-detalle.card {
+  border-color: var(--color-borde);
+  border-radius: 0.5rem;
+  background: var(--color-superficie);
+}
+
+.panel-detalle .card-body {
+  padding: 1.25rem;
+}
+
+.panel-detalle .card-title {
+  margin-bottom: 1rem;
+  color: var(--color-texto);
+  font-size: 1.1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.lista-datos {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.lista-datos div {
+  min-width: 0;
+}
+
+.lista-datos dt {
+  margin-bottom: 0.2rem;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.lista-datos dd {
+  overflow-wrap: anywhere;
+  margin-bottom: 0;
+  color: var(--color-texto);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.panel-registro {
+  grid-column: 1 / -1;
+}
+
+.acciones-detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.estado-carga.alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 760px;
+  margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+  .rejilla-detalle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .panel-registro {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 450px) {
+  .encabezado-detalle {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .encabezado-detalle h1 {
+    font-size: 1.75rem;
+  }
+}

@@ -1,17 +1,61 @@
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session");
+const { randomBytes } = require("node:crypto");
+const { requiereAdministrador } = require("./comun/acceso-administrativo");
+const { almacen: almacenCompartido } = require("./comun/almacen");
+const { crearRouter: crearRouterInscripciones } = require("./modulos/inscripciones/inscripciones.rutas");
+const {
+  crearRouterEventos,
+  crearRouterParticipantes
+} = require("./modulos/recursos-administrativos/recursos-administrativos.rutas");
+const { crearRouter: crearRouterSesion } = require("./modulos/sesion/sesion.rutas");
 
-const app = express();
+const crearApp = (opciones = {}) => {
+  const app = express();
+  const almacen = opciones.almacen || almacenCompartido;
+  const requiereAdministradorConfigurado = opciones.requiereAdministrador || requiereAdministrador;
+  const opcionesCatalogos = { almacen };
 
-app.use(cors({ origin: "http://localhost:4200" }));
-app.use(express.json());
+  app.use(cors({ origin: "http://localhost:4200", credentials: true }));
+  app.use(express.json());
+  app.use(session({
+    name: "eventify.sid",
+    secret: opciones.secretoSesion || process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 60 * 60 * 1000
+    }
+  }));
 
-app.get("/api/estado", (solicitud, respuesta) => {
-  respuesta.status(200).json({ estado: "ok" });
-});
+  app.get("/api/estado", (solicitud, respuesta) => {
+    respuesta.status(200).json({ estado: "ok" });
+  });
 
-app.use((solicitud, respuesta) => {
-  respuesta.status(404).json({ mensaje: "Ruta no encontrada." });
-});
+  app.use("/api/sesion", crearRouterSesion({
+    usuarioAdmin: opciones.usuarioAdmin,
+    contrasenaAdmin: opciones.contrasenaAdmin
+  }));
+  app.use("/api/eventos", requiereAdministradorConfigurado, crearRouterEventos(opcionesCatalogos));
+  app.use("/api/participantes", requiereAdministradorConfigurado, crearRouterParticipantes(opcionesCatalogos));
+  app.use("/api/inscripciones", crearRouterInscripciones({
+    almacen,
+    requiereSesion: requiereAdministradorConfigurado
+  }));
+
+  app.use((solicitud, respuesta) => {
+    respuesta.status(404).json({ mensaje: "Ruta no encontrada." });
+  });
+
+  return app;
+};
+
+const app = crearApp();
+
+app.crearApp = crearApp;
 
 module.exports = app;
