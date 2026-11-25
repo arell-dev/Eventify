@@ -1,0 +1,154 @@
+<section class="modulo-ponentes modulo-detalle">
+  <nav class="barra-volver-ponente" aria-label="Navegación de la página">
+    <a class="enlace-volver-ponente" routerLink="/admin/ponentes">
+      <svg class="icono-volver" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m15 18-6-6 6-6M9 12h12"></path>
+      </svg>
+      Volver a Ponentes
+    </a>
+  </nav>
+
+  @if (cargando()) {
+    <div class="estado-detalle card d-grid align-content-center gap-3 p-4" role="status" aria-label="Cargando datos del ponente">
+      <div class="placeholder-wave d-grid gap-2" aria-hidden="true">
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+      </div>
+      <span class="visually-hidden">Cargando ponente...</span>
+    </div>
+  } @else if (errorCarga() || !ponente()) {
+    <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3" role="alert">
+      <span>{{ errorCarga() }}</span>
+      @if (puedeReintentar()) {
+        <button class="btn btn-peligro-secundario" type="button" (click)="cargarPonente()">Reintentar</button>
+      }
+    </div>
+  } @else {
+    <section class="tarjeta-perfil card" aria-labelledby="nombre-ponente">
+      <div class="tarjeta-perfil-cabecera">
+        <span class="etiqueta-informativa badge rounded-pill">Usuario ponente</span>
+        <div class="acciones-perfil">
+          <a class="btn btn-secundario" routerLink="/admin/ponentes/nuevo">Consultar otro usuario</a>
+          <a class="btn btn-principal" [routerLink]="['/admin/ponentes', idPonente(), 'editar']">Editar datos</a>
+        </div>
+      </div>
+      <h1 id="nombre-ponente">{{ ponente()?.nombre }}</h1>
+      <dl class="datos-perfil">
+        <div>
+          <dt>Correo institucional</dt>
+          <dd class="correo-ponente">{{ ponente()?.correo }}</dd>
+        </div>
+        <div>
+          <dt>Especialidad</dt>
+          <dd>{{ ponente()?.especialidad }}</dd>
+        </div>
+        <div>
+          <dt>Eventos en agenda</dt>
+          <dd class="contador-agenda">{{ cargandoAgenda() ? 'Cargando...' : errorAgenda() ? 'No disponible' : eventos().length }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="seccion-agenda" aria-labelledby="titulo-agenda">
+      <header class="encabezado-agenda">
+        <h2 id="titulo-agenda">Agenda de eventos asignados</h2>
+      </header>
+
+      @if (cargandoAgenda()) {
+        <div class="estado-detalle card d-flex align-items-center justify-content-center p-4" role="status">
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+          Cargando agenda...
+        </div>
+      } @else if (errorAgenda()) {
+        <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3" role="alert">
+          <span>No se pudo cargar la agenda de eventos.</span>
+          <button class="btn btn-peligro-secundario" type="button" (click)="cargarAgenda()">Reintentar</button>
+        </div>
+      } @else if (eventos().length === 0) {
+        <div class="estado-detalle card d-flex flex-column align-items-center justify-content-center gap-2 px-3 py-4 text-center" aria-live="polite">
+          <h3 class="mb-0 fs-5">No hay eventos asignados</h3>
+          <p class="mb-0 text-body-secondary">Los eventos con este ponente aparecerán aquí.</p>
+        </div>
+      } @else {
+        <div class="panel-agenda card overflow-hidden">
+          <div class="tabla-desktop table-responsive" tabindex="0" role="region" aria-label="Agenda de eventos. Desplázate horizontalmente para consultar todas las columnas.">
+            <table class="table table-hover align-middle tabla-agenda mb-0">
+              <caption class="visually-hidden">Eventos asignados al ponente con modalidad, horario, estado y ubicación.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Evento</th>
+                  <th scope="col">Modalidad</th>
+                  <th scope="col">Horario (hora peruana)</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (evento of eventos(); track evento.id) {
+                  @let estado = estadoAgenda(evento);
+                  <tr>
+                    <th scope="row">
+                      <span class="enlace-agenda d-block fw-semibold">{{ evento.titulo }}</span>
+                      <span class="d-block dato-secundario">{{ evento.tipo }}</span>
+                      @if (evento.lugar) {
+                        <span class="d-block dato-secundario">{{ evento.lugar }}</span>
+                      }
+                      @if (evento.enlace) {
+                        <a class="enlace-evento" [href]="evento.enlace" target="_blank" rel="noopener noreferrer">Abrir enlace del evento</a>
+                      }
+                    </th>
+                    <td>
+                      <span class="badge rounded-pill etiqueta-agenda" [class.etiqueta-informativa]="evento.modalidad === 'PRESENCIAL'">{{ etiquetaModalidad(evento.modalidad) }}</span>
+                    </td>
+                    <td class="fecha-agenda">{{ formatearHorario(evento) }}</td>
+                    <td>
+                      <span class="badge rounded-pill etiqueta-agenda" [class.etiqueta-proximo]="estado === 'Próximo'" [class.etiqueta-en-curso]="estado === 'En curso'">{{ estado }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="agenda-movil list-group list-group-flush" aria-label="Eventos asignados">
+            @for (evento of eventos(); track evento.id) {
+              @let estado = estadoAgenda(evento);
+              <li class="evento-movil list-group-item">
+                <article>
+                  <h3><span class="enlace-agenda">{{ evento.titulo }}</span></h3>
+                  <p class="tipo-evento">{{ evento.tipo }}</p>
+                  <dl class="datos-evento-movil">
+                    <div>
+                      <dt>Modalidad</dt>
+                      <dd><span class="badge rounded-pill etiqueta-agenda" [class.etiqueta-informativa]="evento.modalidad === 'PRESENCIAL'">{{ etiquetaModalidad(evento.modalidad) }}</span></dd>
+                    </div>
+                    <div>
+                      <dt>Horario (hora peruana)</dt>
+                      <dd>{{ formatearHorario(evento) }}</dd>
+                    </div>
+                    <div>
+                      <dt>Estado</dt>
+                      <dd><span class="badge rounded-pill etiqueta-agenda" [class.etiqueta-proximo]="estado === 'Próximo'" [class.etiqueta-en-curso]="estado === 'En curso'">{{ estado }}</span></dd>
+                    </div>
+                    @if (evento.lugar) {
+                      <div>
+                        <dt>Lugar</dt>
+                        <dd>{{ evento.lugar }}</dd>
+                      </div>
+                    }
+                    @if (evento.enlace) {
+                      <div>
+                        <dt>Enlace</dt>
+                        <dd><a class="enlace-evento" [href]="evento.enlace" target="_blank" rel="noopener noreferrer">Abrir enlace del evento</a></dd>
+                      </div>
+                    }
+                  </dl>
+                </article>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </section>
+  }
+</section>

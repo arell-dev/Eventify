@@ -1,0 +1,233 @@
+.modulo-detalle {
+  width: 100%;
+  container-type: inline-size;
+}
+
+.modulo-detalle > :not(.barra-volver-ponente) {
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+.tarjeta-perfil {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.tarjeta-perfil-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.etiqueta-informativa,
+.etiqueta-agenda {
+  padding: 0.125rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 0.875rem;
+  letter-spacing: 0.01875rem;
+}
+
+.etiqueta-agenda {
+  background: var(--color-cancelada-suave);
+  color: var(--color-texto-secundario);
+}
+
+.etiqueta-informativa {
+  --color-informacion-suave: #d0f8ff;
+  --color-informacion-texto: #00363d;
+  background: var(--color-informacion-suave);
+  color: var(--color-informacion-texto);
+}
+
+.etiqueta-proximo {
+  background: var(--color-confirmada-suave);
+  color: var(--color-confirmada);
+}
+
+.etiqueta-en-curso {
+  background: var(--color-advertencia-suave);
+  color: var(--color-advertencia);
+}
+
+.tarjeta-perfil h1 {
+  margin: 0;
+  color: var(--color-texto);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.015625rem;
+  line-height: 2.375rem;
+  overflow-wrap: anywhere;
+}
+
+.datos-perfil {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.datos-perfil dt,
+.datos-evento-movil dt {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.datos-perfil dd,
+.datos-evento-movil dd {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.correo-ponente,
+.contador-agenda {
+  font-family: 'Spline Sans Mono', 'Cascadia Code', monospace;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.acciones-perfil {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.acciones-perfil .btn {
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.seccion-agenda {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.encabezado-agenda h2 {
+  margin: 0;
+  color: var(--color-texto);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.625rem;
+}
+
+.estado-detalle {
+  min-height: 10rem;
+}
+
+.tabla-agenda {
+  min-width: 36rem;
+  --bs-table-bg: var(--color-superficie);
+  --bs-table-hover-bg: var(--color-superficie-suave);
+}
+
+.tabla-agenda thead th {
+  padding: 0.75rem 1rem;
+  background: var(--color-superficie-suave);
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabla-agenda tbody th,
+.tabla-agenda tbody td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+}
+
+.tabla-agenda .fecha-agenda {
+  color: var(--color-texto-secundario);
+  font-family: 'Spline Sans Mono', 'Cascadia Code', monospace;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dato-secundario {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+}
+
+.enlace-evento,
+.enlace-agenda {
+  color: var(--color-principal);
+  text-underline-offset: 0.2rem;
+}
+
+.enlace-evento {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.agenda-movil {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .tarjeta-perfil h1 {
+    font-size: 1.75rem;
+    line-height: 2.125rem;
+  }
+
+  .datos-perfil {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.875rem;
+  }
+
+  .acciones-perfil,
+  .acciones-perfil .btn {
+    width: 100%;
+  }
+
+  .tarjeta-perfil-cabecera {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@container (width < 40rem) {
+  .tabla-desktop {
+    display: none;
+  }
+
+  .agenda-movil {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .evento-movil {
+    padding: 1rem;
+    border: 1px solid var(--color-borde);
+    border-radius: 0.375rem;
+    background: var(--color-superficie);
+  }
+
+  .evento-movil h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .tipo-evento {
+    margin: 0 0 0.875rem;
+    color: var(--color-texto-secundario);
+    font-size: 0.75rem;
+  }
+
+  .datos-evento-movil {
+    display: grid;
+    gap: 0.625rem;
+    margin: 0;
+  }
+}

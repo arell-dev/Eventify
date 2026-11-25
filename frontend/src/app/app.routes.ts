@@ -53,6 +53,38 @@ export const routes: Routes = [
               .then((modulo) => modulo.InscripcionDetalleComponent)
           }
         ]
+      },
+      {
+        path: 'ponentes',
+        loadComponent: () => import('./admin/ponentes/ponentes.component')
+          .then((modulo) => modulo.PonentesComponent),
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            title: 'Ponentes | Eventos UTP',
+            loadComponent: () => import('./admin/ponentes/paginas/lista/lista.component')
+              .then((modulo) => modulo.PonentesListaComponent)
+          },
+          {
+            path: 'nuevo',
+            title: 'Registrar ponente | Eventos UTP',
+            loadComponent: () => import('./admin/ponentes/paginas/seleccion/seleccion.component')
+              .then((modulo) => modulo.PonenteSeleccionComponent)
+          },
+          {
+            path: ':id/editar',
+            title: 'Editar ponente | Eventos UTP',
+            loadComponent: () => import('./admin/ponentes/paginas/edicion/edicion.component')
+              .then((modulo) => modulo.PonenteEdicionComponent)
+          },
+          {
+            path: ':id',
+            title: 'Detalle del ponente | Eventos UTP',
+            loadComponent: () => import('./admin/ponentes/paginas/detalle/detalle.component')
+              .then((modulo) => modulo.PonenteDetalleComponent)
+          }
+        ]
       }
     ]
   }

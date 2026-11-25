@@ -7,6 +7,7 @@ const { almacen: almacenCompartido } = require("./comun/almacen");
 const { crearRouter: crearRouterInscripciones } = require("./modulos/inscripciones/inscripciones.rutas");
 const { crearRouter: crearRouterEventos, crearRouterPublico } = require("./modulos/eventos/eventos.rutas");
 const { crearRouterParticipantes } = require("./modulos/recursos-administrativos/recursos-administrativos.rutas");
+const { crearRouter: crearRouterPonentes } = require("./modulos/ponentes/ponentes.rutas");
 const { crearRouter: crearRouterSesion } = require("./modulos/sesion/sesion.rutas");
 const { crearRouter: crearRouterUsuarios } = require("./modulos/sesion/usuarios.rutas");
 
@@ -42,6 +43,7 @@ const crearApp = (opciones = {}) => {
 
   app.use("/api/eventos", requiereAdministradorConfigurado, crearRouterEventos(opcionesCatalogos));
 
+  app.use("/api/ponentes", requiereAdministradorConfigurado, crearRouterPonentes(opcionesCatalogos));
   app.use("/api/participantes", requiereAdministradorConfigurado, crearRouterParticipantes(opcionesCatalogos));
 
   app.use("/api/inscripciones", crearRouterInscripciones({

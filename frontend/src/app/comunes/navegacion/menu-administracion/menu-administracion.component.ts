@@ -71,7 +71,7 @@ export class MenuAdministracionComponent {
       nombre: 'Ponentes',
       ruta: '/admin/ponentes',
       icono: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-6 9v-2a6 6 0 0 1 12 0v2m1-14 1.1 2.2 2.4.3-1.75 1.7.4 2.4-2.15-1.15-2.15 1.15.4-2.4-1.75-1.7 2.4-.3L19 7z',
-      disponible: false
+      disponible: true
     }
   ];
 

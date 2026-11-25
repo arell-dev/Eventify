@@ -1,0 +1,124 @@
+@base = http://localhost:3000/api
+@origen = http://localhost:4200
+@adminCorreo = C25170@utp.edu.pe
+@inicioEvento = 2035-04-10T15:00:00.000Z
+@finEvento = 2035-04-10T16:00:00.000Z
+
+### 01. Iniciar sesión administrativa (200)
+# @name inicioPonentes
+# @prompt password Contraseña de la cuenta administradora de Eventify
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "{{adminCorreo}}",
+  "contrasena": "{{password}}"
+}
+
+### 02. Listar ponentes (200)
+GET {{base}}/ponentes
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 03. Crear una cuenta de prueba en el padrón (201)
+# @name cuentaPonentes
+POST {{base}}/usuarios
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "nombre": "Prueba de Ponentes",
+  "correo": "ponente-{{$guid}}@eventify.test",
+  "carrera": "",
+  "especialidad": "Desarrollo web",
+  "contrasena": "DemoPonentes2026!"
+}
+
+### 04. Consultar cuentas disponibles para ser ponentes (200)
+GET {{base}}/usuarios?rol=ponente
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 05. Registrar la cuenta como ponente (201)
+# @name altaPonente
+POST {{base}}/ponentes
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{cuentaPonentes.response.body.$.id}}
+}
+
+### 06. Consultar la ficha creada (200)
+GET {{base}}/ponentes/{{altaPonente.response.body.$.id}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 07. Consultar la agenda inicial (200, [])
+GET {{base}}/ponentes/{{altaPonente.response.body.$.id}}/eventos
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 08. Editar el ponente y conservar su usuarioId (200)
+PUT {{base}}/ponentes/{{altaPonente.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "nombre": "Prueba de Ponentes",
+  "correo": "{{cuentaPonentes.response.body.$.correo}}",
+  "especialidad": "Arquitectura web"
+}
+
+### 09. Comprobar que el alta duplicada se bloquea (409)
+POST {{base}}/ponentes
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{cuentaPonentes.response.body.$.id}}
+}
+
+### 10. Asignar un evento de prueba al ponente (201)
+# @name eventoParaAgenda
+POST {{base}}/eventos
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "titulo": "Taller de prueba de Ponentes",
+  "descripcion": "Evento para verificar la agenda del ponente.",
+  "tipo": "TALLER",
+  "modalidad": "VIRTUAL",
+  "lugar": "",
+  "enlace": "https://example.com/ponentes",
+  "inicio": "{{inicioEvento}}",
+  "fin": "{{finEvento}}",
+  "cupo": 10,
+  "ponenteId": {{altaPonente.response.body.$.id}}
+}
+
+### 11. Consultar la agenda con el evento y sus cupos (200)
+GET {{base}}/ponentes/{{altaPonente.response.body.$.id}}/eventos
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 12. Comprobar que el evento asignado impide la baja (409)
+DELETE {{base}}/ponentes/{{altaPonente.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 13. Eliminar el evento de prueba (200)
+DELETE {{base}}/eventos/{{eventoParaAgenda.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 14. Eliminar el ponente sin eventos (200)
+DELETE {{base}}/ponentes/{{altaPonente.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
+
+### 15. Comprobar que la ficha se eliminó (404)
+GET {{base}}/ponentes/{{altaPonente.response.body.$.id}}
+Cookie: {{inicioPonentes.response.headers.Set-Cookie}}
