@@ -10,6 +10,10 @@ test("Eventos respeta relaciones, horarios, cupos y acceso público", async (con
   const directorio = await fs.mkdtemp(path.join(os.tmpdir(), "eventify-eventos-"));
   const rutaDatos = path.join(directorio, "datos.json");
   const almacen = crearAlmacen({ rutaDatos });
+  const datosIniciales = await almacen.leer();
+  const perfilPonenteInicial = datosIniciales.ponentes.find((ponente) => ponente.id === 1);
+  const usuarioPonenteInicial = datosIniciales.usuarios.find((usuario) => usuario.id === perfilPonenteInicial.usuarioId);
+  const participanteInicial = datosIniciales.participantes.find((participante) => participante.id === 1);
   const aplicacion = app.crearApp({
     almacen,
     requiereAdministrador: (solicitud, respuesta, siguiente) => siguiente()
@@ -58,11 +62,11 @@ test("Eventos respeta relaciones, horarios, cupos y acceso público", async (con
   assert.equal(detalle.cuposDisponibles, 0);
   assert.equal((await fetch(`${base}/eventos/${evento.id}`, { method: "DELETE", headers: cabeceras })).status, 409);
   const publico = await (await fetch(`${base}/publico/eventos/${evento.id}`)).json();
-  assert.equal(publico.nombrePonente, "Andrea Salazar");
+  assert.equal(publico.nombrePonente, usuarioPonenteInicial.nombre);
   assert.equal(publico.cuposDisponibles, 0);
   assert.equal(Object.hasOwn(publico, "correo"), false);
   const vinculos = await (await fetch(`${base}/eventos/${evento.id}/inscripciones`)).json();
-  assert.equal(vinculos[0].participanteCarrera, "Ingeniería de Sistemas");
+  assert.equal(vinculos[0].participanteCarrera, participanteInicial.carrera);
   const solicitudSinOrigen = await fetch(`${base}/eventos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

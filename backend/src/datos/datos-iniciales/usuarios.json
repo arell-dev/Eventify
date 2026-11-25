@@ -10,55 +10,65 @@
   },
   {
     "id": 2,
-    "nombre": "María López",
-    "correo": "maria.lopez@utp.edu.pe",
-    "carrera": "Ingeniería de Sistemas",
+    "nombre": "Zamira Luana Mendoza Sacsa",
+    "correo": "U24270382@utp.edu.pe",
+    "carrera": "Ingeniería de Sistemas e Informatica",
     "especialidad": "",
     "rol": "USUARIO",
-    "contrasena": "Eventify2026!"
+    "contrasena": "Estudi@nte2026!"
   },
   {
     "id": 3,
-    "nombre": "Carlos Torres",
-    "correo": "carlos.torres@utp.edu.pe",
-    "carrera": "Ingeniería Industrial",
+    "nombre": "Mauricio Barrutia Ojeda",
+    "correo": "U24215633@utp.edu.pe",
+    "carrera": "Ingeniería de Sistemas e Informatica",
     "especialidad": "",
     "rol": "USUARIO",
-    "contrasena": "Eventify2026!"
+    "contrasena": "Estudi@nte2026!"
   },
   {
     "id": 4,
-    "nombre": "Lucía Ramírez",
-    "correo": "lucia.ramirez@utp.edu.pe",
-    "carrera": "Administración de Empresas",
+    "nombre": "Ashley Guevara Guerrero",
+    "correo": "U24228781@utp.edu.pe",
+    "carrera": "Ingeniería de Sistemas e Informatica",
     "especialidad": "",
     "rol": "USUARIO",
-    "contrasena": "Eventify2026!"
+    "contrasena": "Estudi@nte2026!"
   },
   {
     "id": 5,
-    "nombre": "Andrea Salazar",
-    "correo": "andrea.salazar@utp.edu.pe",
-    "carrera": "",
-    "especialidad": "Desarrollo web",
+    "nombre": "Mateo Jimenez Chinchay",
+    "correo": "U24234795@utp.edu.pe",
+    "carrera": "Ingeniería de Sistemas e Informatica",
+    "especialidad": "Base de Datos con IA",
     "rol": "USUARIO",
-    "contrasena": "Eventify2026!"
+    "contrasena": "Estudi@nte2026!"
   },
   {
     "id": 6,
-    "nombre": "Diego Mendoza",
-    "correo": "diego.mendoza@utp.edu.pe",
+    "nombre": "Diego Giancarlo Rea",
+    "correo": "U24215195@utp.edu.pe",
     "carrera": "",
-    "especialidad": "Inteligencia artificial",
+    "especialidad": "Cloud con IA",
     "rol": "USUARIO",
-    "contrasena": "Eventify2026!"
+    "contrasena": "Estudi@nte2026!"
   },
   {
     "id": 7,
-    "nombre": "Valeria Soto",
-    "correo": "valeria.soto@utp.edu.pe",
+    "nombre": "Ivan Michell Castillo",
+    "correo": "C242103@utp.edu.pe",
     "carrera": "",
-    "especialidad": "Ciberseguridad",
-    "rol": "USUARIO"
+    "especialidad": "Desarrollo Web",
+    "rol": "USUARIO",
+    "contrasena": "Iv@an230"
+  },
+  {
+    "id": 8,
+    "nombre": "Teofilo Roberto Correa",
+    "correo": "C222383@utp.edu.pe",
+    "carrera": "",
+    "especialidad": "Inteligencia artificial",
+    "rol": "USUARIO",
+    "contrasena": "Teorococ@24"
   }
 ]

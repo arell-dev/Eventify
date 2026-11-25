@@ -1,16 +1,16 @@
 [
   {
     "id": 1,
-    "nombre": "Andrea Salazar",
-    "correo": "andrea.salazar@utp.edu.pe",
+    "nombre": "Ivan Michell Castillo",
+    "correo": "C242103@utp.edu.pe",
     "especialidad": "Desarrollo web",
-    "usuarioId": 5
+    "usuarioId": 7
   },
   {
     "id": 2,
-    "nombre": "Diego Mendoza",
-    "correo": "diego.mendoza@utp.edu.pe",
+    "nombre": "Teofilo Roberto Correa",
+    "correo": "C222383@utp.edu.pe",
     "especialidad": "Inteligencia artificial",
-    "usuarioId": 6
+    "usuarioId": 8
   }
 ]
