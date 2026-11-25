@@ -14,4 +14,4 @@ Todas las rutas requieren `req.session.usuario`. El middleware de sesión debe r
 
 ## Datos
 
-Los datos iniciales compartidos están en `src/datos/data.json`. `src/comun/almacen.js` los copia a `backend/datos/eventify.json` solo cuando el archivo de trabajo todavía no existe. Eventos y Participantes deben usar este mismo almacén para conservar las relaciones por ID y la disponibilidad de cupos.
+Los datos iniciales compartidos están separados por colección en `src/datos/datos-iniciales/`. `src/comun/almacen.js` los reúne en `backend/src/datos/eventify.json` cuando el archivo de trabajo todavía no existe. Eventos y Participantes usan este mismo almacén para conservar las relaciones por ID y la disponibilidad de cupos.
