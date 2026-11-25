@@ -23,7 +23,7 @@
           <dl class="lista-datos">
             <div>
               <dt>Nombre completo</dt>
-              <dd>{{ registro.participanteNombre }}</dd>
+              <dd><a class="text-primary" [routerLink]="['/admin/participantes', registro.participanteId]">{{ registro.participanteNombre }}</a></dd>
             </div>
             <div>
               <dt>Correo electrónico</dt>

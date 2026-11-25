@@ -1,9 +1,9 @@
 <header class="barra-volver-inscripcion">
-  <a class="enlace-volver-inscripcion" routerLink="/admin/inscripciones">
+  <a class="enlace-volver-inscripcion" [routerLink]="eventoOrigen ? ['/admin/eventos', eventoOrigen] : ['/admin/inscripciones']">
     <svg class="icono-volver" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="m15 18-6-6 6-6M9 12h12"></path>
     </svg>
-    Volver a Inscripciones
+    {{ eventoOrigen ? 'Volver al evento' : 'Volver a Inscripciones' }}
   </a>
 </header>
 
@@ -93,7 +93,7 @@
           }
 
           <div class="acciones-formulario">
-            <a class="btn btn-secundario" routerLink="/admin/inscripciones">Cancelar</a>
+            <a class="btn btn-secundario" [routerLink]="eventoOrigen ? ['/admin/eventos', eventoOrigen] : ['/admin/inscripciones']">Cancelar</a>
             <button class="btn btn-principal" type="submit" [disabled]="guardando() || errorEventos() || errorParticipantes() || !hayEventosDisponibles() || participantes().length === 0">
               @if (guardando()) {
                 <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>

@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NotificacionesService } from '../../../../comunes/notificaciones/notificaciones.service';
@@ -22,6 +22,7 @@ export class InscripcionFormularioComponent implements OnInit {
   private readonly servicio = inject(InscripcionesService);
   private readonly notificaciones = inject(NotificacionesService);
   private readonly router = inject(Router);
+  private readonly ruta = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly eventos = signal<EventoOpcion[]>([]);
@@ -32,6 +33,7 @@ export class InscripcionFormularioComponent implements OnInit {
   readonly errorEventos = signal(false);
   readonly errorParticipantes = signal(false);
   readonly participanteSeleccionado = signal<ParticipanteOpcion | null>(null);
+  readonly eventoOrigen = Number(this.ruta.snapshot.queryParamMap.get('eventoId')) || null;
 
   readonly formulario = this.formularioBuilder.group({
     eventoId: ['', [Validators.required]],
@@ -74,13 +76,24 @@ export class InscripcionFormularioComponent implements OnInit {
       return;
     }
 
+    const evento = this.eventos().find((elemento) => elemento.id === eventoId);
+
+    if (!evento || this.eventoNoDisponible(evento)) {
+      this.notificaciones.mostrar('Selecciona un evento con cupos disponibles.', 'error');
+      this.cargarEventos();
+      return;
+    }
+
     this.guardando.set(true);
 
     this.servicio.crear({ eventoId, participanteId }).subscribe({
       next: () => {
         this.notificaciones.mostrar('La inscripción fue registrada.');
         this.guardando.set(false);
-        void this.router.navigate(['/admin/inscripciones']);
+        const destino = eventoId === this.eventoOrigen
+          ? ['/admin/eventos', eventoId]
+          : ['/admin/inscripciones'];
+        void this.router.navigate(destino);
       },
       error: (error: HttpErrorResponse) => {
         this.notificaciones.mostrar(this.obtenerMensajeError(error), 'error');
@@ -126,6 +139,11 @@ export class InscripcionFormularioComponent implements OnInit {
     }).subscribe(({ eventos, participantes }) => {
       if (eventos) {
         this.eventos.set(eventos);
+        const eventoOrigen = eventos.find((evento) => evento.id === this.eventoOrigen);
+
+        if (eventoOrigen && !this.eventoNoDisponible(eventoOrigen)) {
+          this.formulario.controls.eventoId.setValue(String(eventoOrigen.id));
+        }
       }
 
       if (participantes) {
