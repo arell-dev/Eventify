@@ -5,7 +5,8 @@ const { randomBytes } = require("node:crypto");
 const { requiereAdministrador } = require("./comun/acceso-administrativo");
 const { almacen: almacenCompartido } = require("./comun/almacen");
 const { crearRouter: crearRouterInscripciones } = require("./modulos/inscripciones/inscripciones.rutas");
-const { crearRouterEventos, crearRouterParticipantes } = require("./modulos/recursos-administrativos/recursos-administrativos.rutas");
+const { crearRouter: crearRouterEventos, crearRouterPublico } = require("./modulos/eventos/eventos.rutas");
+const { crearRouterParticipantes } = require("./modulos/recursos-administrativos/recursos-administrativos.rutas");
 const { crearRouter: crearRouterSesion } = require("./modulos/sesion/sesion.rutas");
 const { crearRouter: crearRouterUsuarios } = require("./modulos/sesion/usuarios.rutas");
 
@@ -36,6 +37,8 @@ const crearApp = (opciones = {}) => {
 
   app.use("/api/sesion", crearRouterSesion({ almacen }));
   app.use("/api/usuarios", requiereAdministradorConfigurado, crearRouterUsuarios(opcionesCatalogos));
+
+  app.use("/api/publico/eventos", crearRouterPublico(opcionesCatalogos));
 
   app.use("/api/eventos", requiereAdministradorConfigurado, crearRouterEventos(opcionesCatalogos));
 

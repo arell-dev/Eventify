@@ -1,3 +1,3 @@
 # Eventos
 
-El integrante 1 implementará la gestión de eventos y sus validaciones. Este módulo se relacionará con ponentes e inscripciones para resolver la agenda y los cupos disponibles, y proporcionará los datos del catálogo público.
+`eventos.rutas.js` define las rutas administrativas y el catálogo público. `eventos.datos.js` reúne la validación, la búsqueda, la representación y los avisos al ponente. El módulo consulta las inscripciones confirmadas para calcular la disponibilidad y utiliza el almacén compartido para guardar cada operación.
