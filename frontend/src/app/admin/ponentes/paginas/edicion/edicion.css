@@ -1,0 +1,54 @@
+.modulo-formulario {
+  width: 100%;
+}
+
+.modulo-formulario > :not(.barra-volver-ponente) {
+  width: min(100%, 48rem);
+  margin-inline: auto;
+}
+
+.formulario-ponente .card-body {
+  padding: clamp(1rem, 4vw, 1.5rem);
+}
+
+.campo-formulario {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  margin-bottom: 0.375rem;
+  color: var(--color-texto);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.acciones-formulario {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.acciones-formulario .btn {
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.estado-listado {
+  min-height: 11.5rem;
+}
+
+@media (max-width: 767.98px) {
+  .acciones-formulario {
+    flex-direction: column-reverse;
+  }
+
+  .acciones-formulario .btn {
+    width: 100%;
+  }
+}

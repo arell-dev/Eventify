@@ -1,0 +1,113 @@
+<section class="modulo-ponentes modulo-formulario">
+  <nav class="barra-volver-ponente" aria-label="Navegación de la página">
+    <a class="enlace-volver-ponente" routerLink="/admin/ponentes">
+      <svg class="icono-volver" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m15 18-6-6 6-6M9 12h12"></path>
+      </svg>
+      Volver a Ponentes
+    </a>
+  </nav>
+
+  <header class="encabezado-formulario">
+    <h1>Consultar y confirmar ponente</h1>
+    <p>Elige una persona del padrón general para registrarla como ponente.</p>
+  </header>
+
+  @if (cargando()) {
+    <div class="estado-listado card d-grid align-content-center gap-3 p-4" role="status" aria-label="Cargando usuarios elegibles">
+      <div class="placeholder-wave d-grid gap-2" aria-hidden="true">
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+      </div>
+      <span class="visually-hidden">Cargando usuarios...</span>
+    </div>
+  } @else if (errorCarga()) {
+    <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3" role="alert">
+      <span>No se pudo cargar la lista de usuarios del padrón.</span>
+      <button class="btn btn-peligro-secundario" type="button" (click)="cargarUsuarios()">Reintentar</button>
+    </div>
+  } @else if (usuarios().length === 0) {
+    <div class="estado-listado card d-flex flex-column align-items-center justify-content-center gap-3 px-3 py-4 text-center">
+      <h2 class="mb-0 fs-5">No hay usuarios disponibles</h2>
+      <p class="mb-1 text-body-secondary">Todos los usuarios elegibles ya están registrados como ponentes.</p>
+      <a class="btn btn-secundario" routerLink="/admin/ponentes">Volver a Ponentes</a>
+    </div>
+  } @else {
+    <form class="formulario-ponente d-grid gap-4" [formGroup]="formulario" (ngSubmit)="guardar()" [attr.aria-busy]="guardando()" novalidate>
+      <section class="panel-seleccion card">
+        <div class="card-body">
+          <search aria-label="Buscar en el padrón de usuarios">
+            <label class="form-label" for="buscar-usuario-ponente">Buscar en la lista de usuarios</label>
+            <div class="control-busqueda mb-3">
+              <svg class="icono-busqueda" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="10.8" cy="10.8" r="6.3"></circle>
+                <path d="m16 16 4.5 4.5"></path>
+              </svg>
+              <input id="buscar-usuario-ponente" class="form-control" type="search" name="busqueda" autocomplete="off" placeholder="Filtrar por nombre, correo o especialidad" [value]="busqueda()" [attr.aria-describedby]="filtrados().length === 0 && mostrarError() ? 'error-usuario-ponente' : null" (input)="actualizarBusqueda($event)" (keydown.enter)="$event.preventDefault()">
+            </div>
+          </search>
+
+          @if (filtrados().length === 0) {
+            <p class="alert alert-light mb-0">No hay usuarios que coincidan con la búsqueda.</p>
+          } @else {
+            <fieldset class="campo-usuarios" [disabled]="guardando()">
+              <legend class="visually-hidden">Usuario que se registrará como ponente</legend>
+              <div class="lista-usuarios list-group">
+                @for (usuario of filtrados(); track usuario.id) {
+                  <label class="opcion-usuario list-group-item" [class.opcion-usuario-seleccionada]="usuarioSeleccionado()?.id === usuario.id">
+                    <input class="form-check-input" type="radio" name="usuarioId" formControlName="usuarioId" [value]="usuario.id.toString()" required [attr.aria-invalid]="mostrarError()" [attr.aria-describedby]="mostrarError() ? 'error-usuario-ponente' : null">
+                    <span class="datos-usuario">
+                      <span class="nombre-usuario">{{ usuario.nombre }}</span>
+                      <span class="dato-secundario">{{ usuario.correo }} · {{ usuario.especialidad }}</span>
+                    </span>
+                  </label>
+                }
+              </div>
+            </fieldset>
+          }
+
+          @if (mostrarError()) {
+            <p id="error-usuario-ponente" class="mensaje-campo">Selecciona un usuario del padrón.</p>
+          }
+        </div>
+      </section>
+
+      <section class="panel-resumen card" aria-labelledby="titulo-resumen-ponente">
+        <div class="card-body">
+          <h2 id="titulo-resumen-ponente">Confirmar datos del ponente seleccionado</h2>
+          @if (usuarioSeleccionado(); as usuario) {
+            <dl class="resumen-usuario">
+              <div>
+                <dt>Nombre</dt>
+                <dd>{{ usuario.nombre }}</dd>
+              </div>
+              <div>
+                <dt>Correo</dt>
+                <dd class="correo-usuario">{{ usuario.correo }}</dd>
+              </div>
+              <div>
+                <dt>Especialidad</dt>
+                <dd>{{ usuario.especialidad }}</dd>
+              </div>
+            </dl>
+          } @else {
+            <p class="sin-seleccion mb-0">Selecciona un usuario para revisar sus datos.</p>
+          }
+
+          <div class="acciones-formulario">
+            <a class="btn btn-secundario" routerLink="/admin/ponentes">Cancelar</a>
+            <button class="btn btn-principal" type="submit" [disabled]="guardando()">
+              @if (guardando()) {
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                Registrando...
+              } @else {
+                Confirmar ponente
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+    </form>
+  }
+</section>

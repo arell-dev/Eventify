@@ -1,0 +1,76 @@
+<section class="modulo-ponentes modulo-formulario">
+  <nav class="barra-volver-ponente" aria-label="Navegación de la página">
+    <a class="enlace-volver-ponente" routerLink="/admin/ponentes">
+      <svg class="icono-volver" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m15 18-6-6 6-6M9 12h12"></path>
+      </svg>
+      Volver a Ponentes
+    </a>
+  </nav>
+
+  @if (cargando()) {
+    <div class="estado-listado card d-grid align-content-center gap-3 p-4" role="status" aria-label="Cargando datos del ponente">
+      <div class="placeholder-wave d-grid gap-2" aria-hidden="true">
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+        <span class="placeholder col-12 rounded-1 py-3"></span>
+      </div>
+      <span class="visually-hidden">Cargando ponente...</span>
+    </div>
+  } @else if (errorCarga() || !ponente()) {
+    <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3" role="alert">
+      <span>{{ errorCarga() }}</span>
+      @if (puedeReintentar()) {
+        <button class="btn btn-peligro-secundario" type="button" (click)="cargarPonente()">Reintentar</button>
+      }
+    </div>
+  } @else {
+    <header class="encabezado-formulario">
+      <h1>Editar ponente</h1>
+      <p>Actualiza el nombre, correo y especialidad del usuario registrado.</p>
+    </header>
+
+    <form class="formulario-ponente card" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <div class="card-body">
+        <div class="campo-formulario">
+          <label class="form-label" for="nombre">Nombre completo <span aria-hidden="true">*</span></label>
+          @let errorNombre = errorCampo('nombre');
+          <input id="nombre" class="form-control" type="text" name="nombre" formControlName="nombre" autocomplete="name" required [readOnly]="guardando()" [attr.aria-invalid]="!!errorNombre" [attr.aria-describedby]="errorNombre ? 'error-nombre' : null">
+          @if (errorNombre) {
+            <p id="error-nombre" class="mensaje-campo">{{ errorNombre }}</p>
+          }
+        </div>
+
+        <div class="campo-formulario">
+          <label class="form-label" for="correo">Correo electrónico <span aria-hidden="true">*</span></label>
+          @let errorCorreo = errorCampo('correo');
+          <input id="correo" class="form-control" type="email" name="correo" formControlName="correo" autocomplete="email" autocapitalize="none" spellcheck="false" required [readOnly]="guardando()" [attr.aria-invalid]="!!errorCorreo" [attr.aria-describedby]="errorCorreo ? 'error-correo' : null">
+          @if (errorCorreo) {
+            <p id="error-correo" class="mensaje-campo">{{ errorCorreo }}</p>
+          }
+        </div>
+
+        <div class="campo-formulario">
+          <label class="form-label" for="especialidad">Especialidad <span aria-hidden="true">*</span></label>
+          @let errorEspecialidad = errorCampo('especialidad');
+          <input id="especialidad" class="form-control" type="text" name="especialidad" formControlName="especialidad" required [readOnly]="guardando()" [attr.aria-invalid]="!!errorEspecialidad" [attr.aria-describedby]="errorEspecialidad ? 'error-especialidad' : null">
+          @if (errorEspecialidad) {
+            <p id="error-especialidad" class="mensaje-campo">{{ errorEspecialidad }}</p>
+          }
+        </div>
+
+        <div class="acciones-formulario">
+          <a class="btn btn-secundario" [routerLink]="['/admin/ponentes', idPonente()]">Cancelar</a>
+          <button class="btn btn-principal" type="submit" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Guardando...
+            } @else {
+              Guardar cambios
+            }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+</section>
