@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": 1,
+    "eventoId": 2,
+    "participanteId": 1,
+    "estado": "CONFIRMADA",
+    "fechaRegistro": "2026-11-23T16:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "eventoId": 2,
+    "participanteId": 2,
+    "estado": "CANCELADA",
+    "fechaRegistro": "2026-11-23T18:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "eventoId": 3,
+    "participanteId": 3,
+    "estado": "CONFIRMADA",
+    "fechaRegistro": "2026-11-24T15:00:00.000Z"
+  }
+]

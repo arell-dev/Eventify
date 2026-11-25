@@ -1,0 +1,74 @@
+<button class="btn boton-campana position-relative" type="button" [attr.aria-label]="etiqueta()" [attr.aria-expanded]="abierto()" aria-controls="panel-notificaciones" aria-haspopup="dialog" (click)="abrir()">
+  <app-icono-catalogo nombre="campana"/>
+  @if (pendientes() > 0) {
+    <span class="contador-avisos badge rounded-pill" aria-hidden="true">{{ pendientes() }}</span>
+  }
+</button>
+
+<dialog #panel id="panel-notificaciones" class="panel-notificaciones" aria-labelledby="titulo-notificaciones" closedby="any" (close)="alCerrar()" (click)="alPulsarFondo($event, panel)">
+  <div class="interior-notificaciones d-flex flex-column h-100">
+    <header class="cabecera-notificaciones d-flex align-items-center gap-2">
+      <button class="btn boton-cierre" type="button" aria-label="Cerrar notificaciones" autofocus (click)="cerrar()">
+        <app-icono-catalogo nombre="cerrar"/>
+      </button>
+      <h2 id="titulo-notificaciones" class="h5 mb-0">Notificaciones</h2>
+    </header>
+
+    @if (cuentaUsuario()) {
+      <label class="filtro-notificaciones form-check form-switch d-flex align-items-center gap-2 mb-0">
+        <input class="form-check-input m-0" type="checkbox" role="switch" #interruptor [checked]="verTodas()" (change)="verTodas.set(interruptor.checked)">
+        <span>Ver todas</span>
+      </label>
+
+      <div class="contenido-notificaciones d-flex flex-column flex-grow-1">
+        @if (errorConsulta()) {
+          <div class="alert alert-danger aviso-error">
+            <p class="mb-1" role="alert">No se pudieron consultar tus notificaciones.</p>
+            <button class="btn btn-secundario btn-sm" type="button" [disabled]="consultando()" (click)="recargar()">Reintentar</button>
+          </div>
+        }
+
+        @if (errorLectura()) {
+          <p class="alert alert-danger aviso-error" role="alert">No se pudo marcar la notificación como leída. Vuelve a seleccionarla para reintentar.</p>
+        }
+
+        @if (cargando()) {
+          <p class="estado-notificaciones" role="status">Cargando notificaciones…</p>
+        } @else if (avisosVisibles().length) {
+          <ul class="list-unstyled mb-0">
+            @for (aviso of avisosVisibles(); track aviso.id) {
+              <li class="fila-notificacion">
+                <button class="boton-notificacion w-100 text-start" type="button" [class.aviso-pendiente]="!aviso.leida" [disabled]="actualizandoAviso() !== null" (click)="seleccionarAviso(aviso)">
+                  <span class="mensaje-notificacion">{{ aviso.mensaje }}</span>
+                  <span class="datos-notificacion d-flex flex-wrap align-items-center gap-2">
+                    <time [attr.datetime]="aviso.fecha">{{ fechaDia(aviso.fecha) }}</time>
+                    <span>
+                      @if (actualizandoAviso() === aviso.id) {
+                        Marcando como leída…
+                      } @else {
+                        {{ aviso.leida ? 'Leída' : 'No leída' }}
+                      }
+                    </span>
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (!errorConsulta()) {
+          <div class="estado-notificaciones" role="status">
+            <app-icono-catalogo nombre="campana"/>
+            <p class="mb-0">{{ verTodas() ? 'No tienes notificaciones' : 'No tienes notificaciones nuevas' }}</p>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="contenido-notificaciones d-flex flex-column flex-grow-1">
+        <div class="estado-notificaciones">
+          <app-icono-catalogo nombre="campana"/>
+          <p>Inicia sesión para ver tus notificaciones.</p>
+          <a class="btn btn-principal" routerLink="/acceso" (click)="cerrar()">Iniciar sesión</a>
+        </div>
+      </div>
+    }
+  </div>
+</dialog>

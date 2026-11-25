@@ -40,6 +40,11 @@ test("reúne las semillas por colección al crear el archivo de trabajo", async 
 
   assert.equal(administradores.length, 1);
   assert.equal(datos.usuarios.length, usuariosIniciales.length);
+  assert.equal(datos.usuarios.find((usuario) => usuario.id === 1).rol, "ADMIN");
+  assert.ok(datos.usuarios.filter((usuario) => usuario.id !== 1).every((usuario) => usuario.rol === "USUARIO"));
+
+  assert.deepEqual(datos.participantes.map((participante) => participante.usuarioId).sort((a, b) => a - b), [2, 3, 4]);
+  assert.deepEqual(datos.ponentes.map((ponente) => ponente.usuarioId).sort((a, b) => a - b), [7, 8]);
 
   for (const cuentaInicial of usuariosIniciales) {
     const cuenta = datos.usuarios.find((elemento) => elemento.id === cuentaInicial.id);
@@ -48,11 +53,25 @@ test("reúne las semillas por colección al crear el archivo de trabajo", async 
     assert.equal(Object.hasOwn(cuenta, "contrasenaHash"), Object.hasOwn(cuentaInicial, "contrasena"));
   }
 
-  const usuario = datos.usuarios.find((item) => item.correo === "maria.lopez@utp.edu.pe");
-  const otroUsuario = datos.usuarios.find((item) => item.correo === "carlos.torres@utp.edu.pe");
-  assert.equal(comprobarContrasena("Eventify2026!", usuario.contrasenaHash), true);
+  const cuentaDosInicial = usuariosIniciales.find((usuario) => usuario.id === 2);
+  const cuentaTresInicial = usuariosIniciales.find((usuario) => usuario.id === 3);
+  const cuentaSieteInicial = usuariosIniciales.find((usuario) => usuario.id === 7);
+  const usuario = datos.usuarios.find((item) => item.id === cuentaDosInicial.id);
+  const otroUsuario = datos.usuarios.find((item) => item.id === cuentaTresInicial.id);
+  const usuarioPonente = datos.usuarios.find((item) => item.id === cuentaSieteInicial.id);
+
+  assert.equal(comprobarContrasena(cuentaDosInicial.contrasena, usuario.contrasenaHash), true);
   assert.equal(comprobarContrasena("contraseña incorrecta", usuario.contrasenaHash), false);
   assert.notEqual(usuario.contrasenaHash, otroUsuario.contrasenaHash);
+  assert.equal(comprobarContrasena(cuentaSieteInicial.contrasena, usuarioPonente.contrasenaHash), true);
+
+  for (const perfil of [...datos.ponentes, ...datos.participantes]) {
+    const cuenta = datos.usuarios.find((usuario) => usuario.id === perfil.usuarioId);
+
+    assert.equal(perfil.nombre, cuenta.nombre);
+    assert.equal(perfil.correo.toLowerCase(), cuenta.correo.toLowerCase());
+  }
+
   assert.ok(datos.ponentes.every((ponente) => datos.usuarios.some((usuario) => usuario.id === ponente.usuarioId)));
   assert.ok(datos.participantes.every((participante) => datos.usuarios.some((usuario) => usuario.id === participante.usuarioId)));
   assert.ok(datos.eventos.every((evento) => datos.ponentes.some((ponente) => ponente.id === evento.ponenteId)));

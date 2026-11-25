@@ -12,6 +12,8 @@ El catálogo de eventos es público y se define en el módulo de Eventos. Consul
 
 El navegador solicita la inscripción y muestra la confirmación después de recibir una respuesta exitosa. El servidor procesa la consulta de cupos y la inscripción dentro de una transacción del almacén. La cola del almacén atiende las escrituras de una en una y guarda cada cambio antes de iniciar la siguiente.
 
+Si la cuenta pertenece al ponente asignado al evento, la consulta y la solicitud de inscripción propia devuelven `409` con el código `PONENTE_ASIGNADO`. La comprobación usa el ID de usuario del perfil de ponente. Se conserva cualquier inscripción existente y el mismo usuario puede inscribirse en otros eventos si cumple las condiciones de disponibilidad.
+
 Si dos personas solicitan el último cupo a la vez, una recibe la confirmación y la otra recibe el error 409 con el mensaje de que ya no hay cupos. La segunda solicitud consulta el estado guardado por la primera. Si la persona todavía no tiene perfil de participante, una solicitud rechazada no lo crea.
 
 Esta coordinación corresponde a una sola instancia del backend. Para ejecutar varias instancias se necesitaría un almacén compartido con transacciones entre procesos.

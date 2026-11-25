@@ -9,6 +9,10 @@
   height: 2rem;
 }
 
+.acciones-cabecera {
+  min-width: 0;
+}
+
 .marca-publica {
   font-size: 1rem;
   line-height: 1.375;

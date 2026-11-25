@@ -1,9 +1,6 @@
 const express = require("express");
 const { representarEvento } = require("../eventos/eventos.datos");
-const {
-  ErrorPerfil, leerId, validarCuerpo, buscarPerfil, validarDatosPerfil, correoPerfilOcupado,
-  registrarPerfil, manejarPerfil, limitarOrigenDeCambios
-} = require("../../comun/perfiles");
+const { ErrorPerfil, leerId, validarCuerpo, buscarPerfil, validarDatosPerfil, correoPerfilOcupado, registrarPerfil, manejarPerfil, limitarOrigenDeCambios } = require("../../comun/perfiles");
 
 const crearRouter = ({ almacen }) => {
   const router = express.Router();
