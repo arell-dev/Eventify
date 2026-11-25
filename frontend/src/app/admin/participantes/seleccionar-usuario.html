@@ -1,0 +1,77 @@
+<header class="barra-regreso">
+  <a routerLink="/admin/participantes">
+    <span class="icono" aria-hidden="true">arrow_back</span>
+    Volver a participantes
+  </a>
+</header>
+
+<div class="pagina-formulario">
+  <header class="encabezado-pagina d-flex flex-wrap align-items-end justify-content-between gap-3">
+    <div>
+      <h1>Consultar y confirmar participante</h1>
+      <p>Selecciona un usuario de la lista y confirma que sus datos sean correctos.</p>
+    </div>
+  </header>
+
+  <section class="panel superficie d-grid gap-3" aria-label="Selección de usuario">
+    <div>
+      <label class="form-label" for="buscar-usuario">Buscar en la lista de usuarios</label>
+      <div class="campo-con-icono">
+        <span class="icono" aria-hidden="true">search</span>
+        <input class="form-control" id="buscar-usuario" type="search" placeholder="Filtrar por nombre, correo o carrera…" #buscador [disabled]="guardando()" (input)="busqueda.set(buscador.value)">
+      </div>
+    </div>
+
+    @if (cargando()) {
+      <p class="texto-secundario mb-0" role="status">Cargando usuarios disponibles…</p>
+    } @else if (errorCarga()) {
+      <div class="alert alert-danger mb-0" role="alert">
+        <p>{{ errorCarga() }}</p>
+        <button class="btn btn-outline-primary btn-sm" type="button" (click)="cargar(false)">Reintentar</button>
+      </div>
+    } @else if (usuariosVisibles().length) {
+      <fieldset class="lista-usuarios" [disabled]="guardando()">
+        <legend class="visually-hidden">Usuarios disponibles</legend>
+        @for (usuario of usuariosVisibles(); track usuario.id) {
+          <label class="fila-usuario" [class.fila-usuario-seleccionada]="usuarioId() === usuario.id">
+            <input class="radio-usuario" type="radio" name="usuario_participante" [value]="usuario.id" [checked]="usuarioId() === usuario.id" (change)="usuarioId.set(usuario.id)">
+            <span class="datos-usuario">
+              <span class="nombre-usuario">{{ usuario.nombre }}</span>
+              <span class="texto-secundario">{{ usuario.correo }} · {{ usuario.carrera }}</span>
+            </span>
+            <span class="etiqueta">{{ usuario.rol }}</span>
+          </label>
+        }
+      </fieldset>
+    } @else {
+      <p class="texto-secundario mb-0" role="status">
+        {{ busqueda().trim() ? 'No hay usuarios que coincidan con la búsqueda.' : 'No hay usuarios disponibles para vincular.' }}
+      </p>
+    }
+  </section>
+
+  <section class="panel-amplio superficie d-grid gap-3" aria-labelledby="titulo-confirmar">
+    <div class="titulo-confirmacion d-flex align-items-center gap-2">
+      <span class="icono" aria-hidden="true">fact_check</span>
+      <h2 id="titulo-confirmar">Confirmar datos del usuario seleccionado</h2>
+    </div>
+    @if (errorConfirmacion()) {
+      <p class="alert alert-danger mb-0" role="alert">{{ errorConfirmacion() }}</p>
+    }
+    @if (seleccionado(); as usuario) {
+      <dl class="datos-ficha">
+        <div><dt>Nombre</dt><dd class="fw-semibold">{{ usuario.nombre }}</dd></div>
+        <div><dt>Correo</dt><dd class="dato-mono">{{ usuario.correo }}</dd></div>
+        <div><dt>Carrera</dt><dd>{{ usuario.carrera }}</dd></div>
+      </dl>
+    } @else {
+      <p class="texto-secundario mb-0">Selecciona un usuario disponible para revisar sus datos.</p>
+    }
+    <div class="acciones-formulario d-flex flex-column-reverse flex-sm-row justify-content-end gap-2">
+      <a class="btn btn-secundario" routerLink="/admin/participantes">Cancelar</a>
+      <button class="btn btn-principal" type="button" [disabled]="!seleccionado() || cargando() || guardando()" (click)="confirmar()">
+        {{ guardando() ? 'Confirmando…' : 'Confirmar participante' }}
+      </button>
+    </div>
+  </section>
+</div>

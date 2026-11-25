@@ -59,7 +59,7 @@ export class MenuAdministracionComponent {
       nombre: 'Participantes',
       ruta: '/admin/participantes',
       icono: 'M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm10 10v-2a4 4 0 0 0-3-3.87m-1-11.13a4 4 0 0 1 0 7.75',
-      disponible: false
+      disponible: true
     },
     {
       nombre: 'Inscripciones',
