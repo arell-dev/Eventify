@@ -1,0 +1,67 @@
+<header class="cabecera-publica bg-white border-bottom">
+  <nav class="contenedor-publico d-flex align-items-center justify-content-between gap-3 py-3" aria-label="Navegación del catálogo">
+    <a class="d-flex align-items-center gap-3 text-body text-decoration-none" routerLink="/eventos" aria-label="Eventos UTP, catálogo">
+      <img class="logo-utp" src="utp.svg" alt="" width="117" height="36">
+      <span class="marca-publica d-none d-sm-flex flex-column border-start ps-3">
+        <strong>Eventos UTP</strong>
+        <small>Catálogo académico</small>
+      </span>
+    </a>
+
+    @if (detalle()) {
+      <a class="enlace-volver d-inline-flex align-items-center gap-1 text-decoration-none" routerLink="/eventos">
+        <app-icono-catalogo nombre="volver"/>
+        Volver al catálogo
+      </a>
+    } @else if (!comprobandoSesion()) {
+      @if (sesion(); as cuenta) {
+        <details #menu class="cuenta-publica position-relative" (keydown.escape)="cerrarMenu($event, menu, activador)" (focusout)="cerrarAlPerderFoco($event, menu)">
+          <summary #activador class="activador-cuenta">
+            <span class="iniciales-cuenta" aria-hidden="true">{{ inicialesCuenta() }}</span>
+            <span class="nombre-cuenta text-truncate">{{ nombreCuenta() }}</span>
+            <app-icono-catalogo class="indicador-cuenta" nombre="desplegar"/>
+          </summary>
+
+          <div class="opciones-cuenta position-absolute end-0 mt-2 border rounded-3 bg-white">
+            @if (cuenta.rol === 'ADMIN') {
+              <a class="dropdown-item d-flex align-items-center gap-2 rounded-2" routerLink="/admin/eventos">
+                <app-icono-catalogo nombre="administracion"/>
+                Administración
+              </a>
+            }
+
+            <button class="dropdown-item salida-cuenta d-flex align-items-center gap-2 rounded-2" type="button" [disabled]="cerrandoSesion()" (click)="cerrarSesion()">
+              <app-icono-catalogo nombre="salir"/>
+              {{ cerrandoSesion() ? 'Cerrando sesión…' : 'Cerrar sesión' }}
+            </button>
+          </div>
+        </details>
+      } @else {
+        <a class="btn btn-secundario boton-acceso d-inline-flex align-items-center gap-1 py-2 px-3" routerLink="/acceso">
+          <app-icono-catalogo nombre="acceso"/>
+          Iniciar sesión
+        </a>
+      }
+    }
+  </nav>
+</header>
+
+@if (cuentaUsuario() && avisos().length) {
+  <div class="contenedor-publico pt-3">
+    <details class="card rounded-3 px-3 py-2">
+      <summary>Notificaciones ({{ avisos().length }})</summary>
+
+      @for (aviso of avisos(); track aviso.id) {
+        <article class="border-top mt-2 pt-2">
+          <p class="mb-1">{{ aviso.mensaje }}</p>
+          <small class="me-2">{{ fechaDia(aviso.fecha) }}</small>
+          <a [routerLink]="['/eventos', aviso.eventoId]">Ver evento</a>
+
+          @if (!aviso.leida) {
+            <button class="btn btn-link btn-sm" type="button" [disabled]="actualizandoAviso() !== null" (click)="marcarLeido(aviso)">Marcar como leída</button>
+          }
+        </article>
+      }
+    </details>
+  </div>
+}

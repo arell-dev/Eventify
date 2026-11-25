@@ -1,0 +1,138 @@
+.fila-detalle {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 1.5rem;
+}
+
+.panel-detalle {
+  padding: 1.5rem;
+}
+
+.titulo-evento {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 2.375rem;
+  letter-spacing: -0.25px;
+  text-wrap: balance;
+}
+
+.titulo-inscripcion {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.875rem;
+  letter-spacing: -0.15px;
+}
+
+.descripcion-evento {
+  text-wrap: pretty;
+}
+
+.columna-inscripcion p {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.dato-evento {
+  border: 1px solid var(--color-borde);
+  border-radius: 0.75rem;
+  background-color: var(--color-superficie-suave);
+}
+
+.dato-evento dt,
+.dato-evento small,
+.disponibilidad strong:first-child {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dato-evento dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.icono-dato {
+  display: grid;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid var(--color-borde);
+  border-radius: 0.5rem;
+  background-color: var(--color-superficie);
+  color: var(--color-principal);
+  font-size: 1.25rem;
+}
+
+.disponibilidad {
+  border-radius: 0.5rem;
+}
+
+.barra-cupos {
+  height: 0.625rem;
+  border-radius: 999px;
+  background-color: var(--color-cancelada-suave);
+}
+
+.barra-cupos .progress-bar {
+  background-color: var(--color-principal);
+}
+
+.texto-confirmacion {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  cursor: pointer;
+}
+
+.casilla-confirmacion {
+  border-color: var(--color-texto-inactivo);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.casilla-confirmacion:checked {
+  border-color: var(--color-principal);
+  background-color: var(--color-principal);
+}
+
+.casilla-confirmacion:focus {
+  border-color: var(--color-foco);
+  box-shadow: 0 0 0 0.125rem var(--color-foco);
+}
+
+.columna-inscripcion .texto-error {
+  color: var(--color-error);
+}
+
+.columna-inscripcion .btn {
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.boton-confirmacion {
+  padding: 0.75rem 1.25rem;
+  line-height: 1.25rem;
+  transition-duration: 120ms;
+}
+
+.boton-confirmacion:disabled {
+  opacity: 0.45;
+}
+
+@media (min-width: 1024px) {
+  .fila-detalle {
+    --bs-gutter-x: 2rem;
+  }
+
+  .columna-evento {
+    width: calc(7 / 12 * 100%);
+  }
+
+  .columna-inscripcion {
+    width: calc(5 / 12 * 100%);
+  }
+
+  .panel-detalle {
+    padding: 2rem;
+  }
+}

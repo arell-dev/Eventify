@@ -10,6 +10,7 @@ const { crearRouter: crearRouterParticipantes } = require("./modulos/participant
 const { crearRouter: crearRouterPonentes } = require("./modulos/ponentes/ponentes.rutas");
 const { crearRouter: crearRouterSesion } = require("./modulos/sesion/sesion.rutas");
 const { crearRouter: crearRouterUsuarios } = require("./modulos/sesion/usuarios.rutas");
+const { crearRouter: crearRouterInscripcionPublica, crearRouterNotificaciones } = require("./modulos/sesion/publico.rutas");
 
 const crearApp = (opciones = {}) => {
   const app = express();
@@ -38,14 +39,19 @@ const crearApp = (opciones = {}) => {
 
   app.use("/api/sesion", crearRouterSesion({ almacen }));
   app.use("/api/usuarios", requiereAdministradorConfigurado, crearRouterUsuarios(opcionesCatalogos));
-
+  
   app.use("/api/publico/eventos", crearRouterPublico(opcionesCatalogos));
+  app.use("/api/publico/eventos", crearRouterInscripcionPublica(opcionesCatalogos));
+
+  app.use("/api/notificaciones", crearRouterNotificaciones(opcionesCatalogos));
+
 
   app.use("/api/eventos", requiereAdministradorConfigurado, crearRouterEventos(opcionesCatalogos));
-
+  
   app.use("/api/ponentes", requiereAdministradorConfigurado, crearRouterPonentes(opcionesCatalogos));
-  app.use("/api/participantes", requiereAdministradorConfigurado, crearRouterParticipantes(opcionesCatalogos));
 
+  app.use("/api/participantes", requiereAdministradorConfigurado, crearRouterParticipantes(opcionesCatalogos));
+  
   app.use("/api/inscripciones", crearRouterInscripciones({
     almacen,
     requiereSesion: requiereAdministradorConfigurado

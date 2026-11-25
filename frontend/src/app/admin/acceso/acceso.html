@@ -1,13 +1,14 @@
 <main class="pagina-acceso container-fluid">
+  <a class="volver-catalogo" routerLink="/eventos" aria-label="Volver a explorar eventos"><span aria-hidden="true">←</span> Explorar eventos</a>
   <section class="tarjeta-acceso card" aria-labelledby="titulo-acceso">
-    <a class="marca-acceso" href="/admin/acceso" aria-label="Eventos UTP, acceso administrativo">
+    <a class="marca-acceso" routerLink="/eventos" aria-label="Eventos UTP, catálogo de eventos">
       <img src="/utp.svg" alt="Universidad Tecnológica del Perú" width="194" height="59">
       <span>Eventos UTP</span>
     </a>
 
     <div class="encabezado-acceso">
       <h1 id="titulo-acceso">Iniciar sesión en Eventos UTP</h1>
-      <p>Accede a la administración de eventos e inscripciones.</p>
+      <p>Accede para consultar tus inscripciones y administrar eventos según tu perfil.</p>
     </div>
 
     <form [formGroup]="formulario" (ngSubmit)="ingresar()" novalidate>
@@ -17,21 +18,24 @@
 
       <div class="mb-3">
         <label class="form-label" for="usuario">Correo electrónico</label>
-        <input id="usuario" class="form-control" type="email" name="username" formControlName="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" required [attr.aria-invalid]="mostrarError('usuario')" [attr.aria-describedby]="mostrarError('usuario') ? 'error-usuario' : null">
+        <input id="usuario" class="form-control" type="email" name="username" formControlName="usuario" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="nombre@utp.edu.pe" required [attr.aria-invalid]="mostrarError('usuario')" [attr.aria-describedby]="mostrarError('usuario') ? 'error-usuario' : null">
         @if (mostrarError('usuario')) {
           <div id="error-usuario" class="mensaje-campo">Ingresa un correo electrónico válido.</div>
         }
       </div>
 
-      <div class="mb-4">
+      <div class="mb-2">
         <label class="form-label" for="contrasena">Contraseña</label>
-        <input id="contrasena" class="form-control" type="password" name="password" formControlName="contrasena" autocomplete="current-password" required [attr.aria-invalid]="mostrarError('contrasena')" [attr.aria-describedby]="mostrarError('contrasena') ? 'error-contrasena' : null">
+        <div class="campo-contrasena">
+          <input id="contrasena" class="form-control" [type]="mostrarContrasena() ? 'text' : 'password'" name="password" formControlName="contrasena" autocomplete="current-password" placeholder="Ingresa tu contraseña" required [attr.aria-invalid]="mostrarError('contrasena')" [attr.aria-describedby]="mostrarError('contrasena') ? 'error-contrasena' : null">
+          <button class="boton-visibilidad" type="button" [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'" [attr.aria-pressed]="mostrarContrasena()" (click)="alternarVisibilidad()"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>@if (mostrarContrasena()) { <path d="m4 4 16 16"/> }</svg></button>
+        </div>
         @if (mostrarError('contrasena')) {
           <div id="error-contrasena" class="mensaje-campo">Ingresa tu contraseña.</div>
         }
       </div>
 
-      <button class="btn btn-principal w-100" type="submit" [disabled]="procesando()">
+      <button class="btn btn-principal btn-ingresar w-100" type="submit" [disabled]="procesando()">
         @if (procesando()) {
           <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
           Ingresando...
@@ -42,3 +46,4 @@
     </form>
   </section>
 </main>
+<footer class="pie-acceso">Eventos UTP · Universidad Tecnológica del Perú</footer>

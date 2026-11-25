@@ -1,22 +1,49 @@
-.pagina-acceso {
-  display: grid;
+:host {
+  display: flex;
   min-height: 100dvh;
-  place-items: center;
-  padding: 1.5rem 1rem;
+  flex-direction: column;
+}
+
+.pagina-acceso {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem 1.25rem;
+}
+
+.volver-catalogo {
+  display: inline-flex;
+  width: min(100%, 1280px);
+  min-height: 44px;
+  align-items: center;
+  gap: 0.55rem;
+  margin-inline: auto;
+  padding-inline: 0.5rem;
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.volver-catalogo:hover {
+  color: var(--color-principal);
 }
 
 .tarjeta-acceso {
-  width: min(100%, 28rem);
-  gap: 1.5rem;
-  padding: clamp(1.5rem, 5vw, 2rem);
+  width: min(100%, 25rem);
+  margin-block: auto;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 8px;
 }
 
 .marca-acceso {
   display: grid;
   justify-items: start;
-  gap: 0.6rem;
+  gap: 0.5rem;
   color: var(--color-texto);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 650;
   text-decoration: none;
 }
@@ -26,24 +53,118 @@
   height: auto;
 }
 
+.marca-acceso span {
+  display: none;
+}
+
 .encabezado-acceso h1 {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-size: 1.5rem;
   line-height: 1.25;
+  text-wrap: balance;
 }
 
 .encabezado-acceso p {
   margin-bottom: 0;
   color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .form-label {
+  margin-bottom: 0.4rem;
   color: var(--color-texto);
+  font-size: 0.75rem;
   font-weight: 600;
+}
+
+.form-control {
+  min-height: 46px;
+  border-color: var(--color-borde);
+  background-color: #ffffff;
+  font-size: 0.875rem;
+}
+
+.form-control::placeholder {
+  color: #776c6d;
+  opacity: 1;
+}
+
+.form-control[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.campo-contrasena {
+  position: relative;
+}
+
+.campo-contrasena .form-control {
+  padding-right: 3rem;
+}
+
+.boton-visibilidad {
+  position: absolute;
+  top: 50%;
+  right: 0.55rem;
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  transform: translateY(-50%);
+  place-items: center;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-texto-secundario);
+}
+
+.boton-visibilidad:hover {
+  background: var(--color-superficie-suave);
+  color: var(--color-principal);
+}
+
+.boton-visibilidad svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
 }
 
 .mensaje-campo {
   margin-top: 0.35rem;
   color: var(--color-error);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+}
+
+.btn-ingresar {
+  min-height: 46px;
+}
+
+.btn-ingresar:is(:hover, :focus-visible, :active) {
+  color: #ffffff;
+}
+
+.pie-acceso {
+  min-height: 3rem;
+  padding: 0.65rem 1rem 1rem;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+@media (max-width: 575px) {
+  .pagina-acceso {
+    padding: 0.5rem 1rem 1rem;
+  }
+
+  .volver-catalogo {
+    min-height: 44px;
+    padding-inline: 0;
+  }
+
+  .tarjeta-acceso {
+    padding: 1.25rem;
+  }
 }
