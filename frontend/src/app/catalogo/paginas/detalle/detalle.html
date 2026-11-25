@@ -96,7 +96,7 @@
       <div class="col-12 columna-inscripcion">
         <aside class="card panel-catalogo panel-detalle d-flex flex-column gap-3" aria-labelledby="titulo-inscripcion">
           <div class="d-flex flex-column gap-1">
-            <h2 id="titulo-inscripcion" class="titulo-inscripcion mb-0">Inscríbete con tu cuenta</h2>
+            <h2 id="titulo-inscripcion" class="titulo-inscripcion mb-0">{{ consultaInscripcion() === 'ponente-asignado' ? 'Tu participación' : 'Inscríbete con tu cuenta' }}</h2>
 
             @if (comprobandoSesion()) {
               <p class="texto-secundario mb-0" role="status">Comprobando tu sesión…</p>
@@ -104,7 +104,7 @@
               <p class="texto-secundario mb-0">Inicia sesión para reservar uno de los cupos disponibles.</p>
             } @else if (sesion()?.rol === 'ADMIN') {
               <p class="texto-secundario mb-0">La inscripción personal requiere una cuenta de usuario.</p>
-            } @else if (inscripcion()?.estado !== 'CONFIRMADA' && estado() === 'PROXIMO') {
+            } @else if (consultaInscripcion() === 'lista' && inscripcion()?.estado !== 'CONFIRMADA' && estado() === 'PROXIMO') {
               <p class="texto-secundario mb-0">Confirma tus datos de usuario para reservar uno de los cupos disponibles.</p>
             }
           </div>
@@ -136,6 +136,10 @@
                   <button class="btn btn-secundario" type="button" (click)="cargarInscripcion()">Reintentar</button>
                 }
 
+                @case ('ponente-asignado') {
+                  <p class="texto-secundario mb-0" role="status">Eres el ponente de este evento. Tu participación ya está asignada.</p>
+                }
+
                 @case ('lista') {
                   @if (inscripcion()?.estado === 'CONFIRMADA') {
                     <p class="estado-confirmada rounded-3 px-3 py-2 mb-0 fw-semibold" role="status">Inscripción confirmada</p>
@@ -163,7 +167,7 @@
               }
             }
 
-            @if (estado() !== 'PROXIMO' && inscripcion()?.estado !== 'CONFIRMADA') {
+            @if (estado() !== 'PROXIMO' && inscripcion()?.estado !== 'CONFIRMADA' && (sesion()?.rol !== 'USUARIO' || consultaInscripcion() === 'lista')) {
               <p class="texto-secundario mb-0">
                 {{ estado() === 'AGOTADO' ? 'Este evento ya no tiene cupos disponibles.' : 'Las inscripciones para este evento están cerradas.' }}
               </p>

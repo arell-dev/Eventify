@@ -1,18 +1,21 @@
 @base = http://localhost:3000/api
 @origen = http://localhost:4200
+@correoUsuario = U24270382@utp.edu.pe
+@correoPonente = C242103@utp.edu.pe
 
 ### Consultar eventos sin iniciar sesión
 GET {{base}}/publico/eventos
 
 ### Iniciar sesión con una cuenta de usuario
 # @name inicioUsuario
+# @prompt contrasenaUsuario Contraseña de la cuenta de usuario
 POST {{base}}/sesion
 Origin: {{origen}}
 Content-Type: application/json
 
 {
-  "usuario": "maria.lopez@utp.edu.pe",
-  "contrasena": "Eventify2026!"
+  "usuario": "{{correoUsuario}}",
+  "contrasena": "{{contrasenaUsuario}}"
 }
 
 ### Consultar la inscripción propia en el evento 1
@@ -27,14 +30,38 @@ Content-Type: application/json
 
 {}
 
+### Iniciar sesión con el ponente asignado al evento 1
+# @name inicioPonente
+# @prompt contrasenaPonente Contraseña de la cuenta del ponente
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "{{correoPonente}}",
+  "contrasena": "{{contrasenaPonente}}"
+}
+
+### Consultar elegibilidad en el evento del ponente (409 PONENTE_ASIGNADO)
+GET {{base}}/publico/eventos/1/mi-inscripcion
+Cookie: {{inicioPonente.response.headers.Set-Cookie}}
+
+### Intentar inscribirse en el propio evento (409 PONENTE_ASIGNADO)
+POST {{base}}/publico/eventos/1/mi-inscripcion
+Origin: {{origen}}
+Cookie: {{inicioPonente.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{}
+
 ### Consultar notificaciones de la cuenta
 GET {{base}}/notificaciones
-Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+Cookie: {{inicioPonente.response.headers.Set-Cookie}}
 
 ### Marcar una notificación propia como leída; sustituye el ID
 PATCH {{base}}/notificaciones/1
 Origin: {{origen}}
-Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+Cookie: {{inicioPonente.response.headers.Set-Cookie}}
 Content-Type: application/json
 
 {

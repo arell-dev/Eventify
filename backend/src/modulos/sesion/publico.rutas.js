@@ -1,6 +1,15 @@
 const express = require("express");
 const { verificarDisponibilidad, representarInscripcion, confirmarInscripcion } = require("../inscripciones/inscripciones.datos");
 
+const conflictoPonenteAsignado = {
+  codigo: "PONENTE_ASIGNADO",
+  mensaje: "Eres el ponente de este evento. Tu participación ya está asignada."
+};
+
+const esPonenteAsignado = (datos, evento, usuarioId) => {
+  return datos.ponentes.some((ponente) => ponente.id === evento.ponenteId && ponente.usuarioId === usuarioId);
+};
+
 const requiereUsuario = (solicitud, respuesta, siguiente) => {
   if (!solicitud.session?.usuario) {
     respuesta.status(401).json({ mensaje: "Inicia sesión para continuar." });
@@ -27,6 +36,11 @@ const crearRouter = ({ almacen }) => {
       
       if (!evento) {
         respuesta.status(404).json({ mensaje: "El evento no existe." });
+        return;
+      }
+
+      if (esPonenteAsignado(datos, evento, solicitud.session.perfil.id)) {
+        respuesta.status(409).json(conflictoPonenteAsignado);
         return;
       }
 
@@ -61,7 +75,12 @@ const crearRouter = ({ almacen }) => {
         if (!evento || !usuario) {
           return { estado: 404, mensaje: "El evento o usuario no existe." };
         }
-        
+
+        // La asignación se verifica dentro de la transacción antes de reservar cupo.
+        if (esPonenteAsignado(datos, evento, usuario.id)) {
+          throw Object.assign(new Error(conflictoPonenteAsignado.mensaje), { codigo: conflictoPonenteAsignado.codigo });
+        }
+
         let participante = datos.participantes.find((item) => item.usuarioId === usuario.id);
         const inscripcion = participante && datos.inscripciones.find((item) => {
           return item.eventoId === evento.id && item.participanteId === participante.id;
@@ -100,6 +119,11 @@ const crearRouter = ({ almacen }) => {
       });
       respuesta.status(resultado.estado).json(resultado.inscripcion || { mensaje: resultado.mensaje });
     } catch (error) {
+      if (error.codigo === conflictoPonenteAsignado.codigo) {
+        respuesta.status(409).json(conflictoPonenteAsignado);
+        return;
+      }
+
       respuesta.status(error.estado || 500).json({ mensaje: error.estado ? error.message : "No se pudo completar la inscripción." });
     }
   });

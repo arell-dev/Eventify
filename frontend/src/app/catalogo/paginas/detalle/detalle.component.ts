@@ -23,12 +23,16 @@ import {
 } from '../../utilidades/presentacion-evento';
 
 type ErrorEvento = 'no-encontrado' | 'error' | null;
-type ConsultaInscripcion = 'inactiva' | 'cargando' | 'lista' | 'error';
+type ConsultaInscripcion = 'inactiva' | 'cargando' | 'lista' | 'ponente-asignado' | 'error';
 
 interface ContextoInscripcion {
   eventoId: number;
   usuario: string;
 }
+
+const esPonenteAsignado = (error: HttpErrorResponse): boolean => {
+  return error.status === 409 && error.error?.codigo === 'PONENTE_ASIGNADO';
+};
 
 @Component({
   selector: 'app-catalogo-detalle',
@@ -142,6 +146,15 @@ export class CatalogoDetalleComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.procesando.set(false);
+
+        // La asignación pudo cambiar desde la consulta inicial de la inscripción.
+        if (esPonenteAsignado(error)) {
+          this.inscripcion.set(null);
+          this.consultaInscripcion.set('ponente-asignado');
+          this.cargarEvento();
+          return;
+        }
+
         this.notificaciones.mostrar(error.error?.mensaje || 'No se pudo registrar la inscripción.', 'error');
 
         if (error.status === 401) {
@@ -219,7 +232,7 @@ export class CatalogoDetalleComponent {
                 return inscripcion;
               }),
               catchError((error: HttpErrorResponse) => {
-                this.consultaInscripcion.set('error');
+                this.consultaInscripcion.set(esPonenteAsignado(error) ? 'ponente-asignado' : 'error');
 
                 if (error.status === 401) {
                   this.sesion.set(null);
