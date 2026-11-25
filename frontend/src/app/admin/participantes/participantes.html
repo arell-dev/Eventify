@@ -1,0 +1,95 @@
+<div class="pagina">
+  <header class="encabezado-pagina d-grid d-sm-flex flex-wrap align-items-end justify-content-sm-between gap-3">
+    <div>
+      <h1>Participantes</h1>
+      <p>Consulta y selecciona usuarios registrados para habilitarlos o revisarlos como participantes.</p>
+    </div>
+    <a class="btn btn-principal boton-icono-texto justify-content-center" routerLink="/admin/participantes/nuevo">
+      <span class="icono" aria-hidden="true">search</span>
+      Seleccionar usuario
+    </a>
+  </header>
+
+  @if (cargando()) {
+    <p class="panel superficie mb-0" role="status">Cargando participantes…</p>
+  } @else if (error()) {
+    <div class="alert alert-danger mb-0" role="alert">
+      <p>{{ error() }}</p>
+      <button class="btn btn-outline-primary btn-sm" type="button" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <dl class="indicadores" aria-label="Indicadores de participantes">
+      <div class="superficie panel">
+        <dt>Participantes registrados</dt>
+        <dd>{{ total() }}</dd>
+      </div>
+      <div class="superficie panel">
+        <dt>Coincidencias</dt>
+        <dd class="indicador-coincidencias" aria-live="polite">{{ visibles().length }}</dd>
+      </div>
+      <div class="superficie panel">
+        <dt>Carreras registradas</dt>
+        <dd>{{ carreras().length }}</dd>
+      </div>
+    </dl>
+
+    <section class="superficie panel filtros" aria-label="Filtros de participantes">
+      <div>
+        <label class="form-label" for="buscar-participante">Buscar por nombre o correo</label>
+        <div class="campo-con-icono">
+          <span class="icono" aria-hidden="true">search</span>
+          <input class="form-control" id="buscar-participante" type="search" placeholder="Nombre o correo" #buscador (input)="busqueda.set(buscador.value)">
+        </div>
+      </div>
+      <div>
+        <label class="form-label" for="carrera-filtro">Filtrar por carrera</label>
+        <select class="form-select" id="carrera-filtro" #filtro (change)="carrera.set(filtro.value)">
+          <option value="">Todas las carreras</option>
+          @for (opcion of carreras(); track opcion) {
+            <option [value]="opcion">{{ opcion }}</option>
+          }
+        </select>
+      </div>
+    </section>
+
+    <section class="superficie" aria-label="Listado de participantes">
+      @if (visibles().length) {
+        <div class="table-responsive" tabindex="0" role="region" aria-label="Tabla de participantes">
+          <table class="table table-hover align-middle mb-0">
+            <caption class="visually-hidden">Nombre, correo, carrera y acciones de cada participante</caption>
+            <thead>
+              <tr>
+                <th scope="col">Usuario</th>
+                <th scope="col">Correo</th>
+                <th scope="col">Carrera</th>
+                <th scope="col" class="text-end text-nowrap">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (participante of visibles(); track participante.id) {
+                <tr>
+                  <th scope="row">
+                    <a [routerLink]="['/admin/participantes', participante.id]">{{ participante.nombre }}</a>
+                  </th>
+                  <td class="dato-mono text-nowrap">{{ participante.correo }}</td>
+                  <td>{{ participante.carrera }}</td>
+                  <td>
+                    <div class="d-flex justify-content-end">
+                      <a class="btn btn-secundario boton-icono" [routerLink]="['/admin/participantes', participante.id]" [attr.aria-label]="'Ver detalle de ' + participante.nombre" title="Ver detalle">
+                        <span class="icono" aria-hidden="true">visibility</span>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="panel mb-0" role="status">
+          {{ total() ? 'No hay participantes que coincidan con la búsqueda.' : 'Todavía no hay participantes registrados.' }}
+        </p>
+      }
+    </section>
+  }
+</div>

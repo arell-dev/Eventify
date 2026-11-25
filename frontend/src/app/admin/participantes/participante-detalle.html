@@ -1,0 +1,87 @@
+<header class="barra-regreso">
+  <a routerLink="/admin/participantes">
+    <span class="icono" aria-hidden="true">arrow_back</span>
+    Volver a participantes
+  </a>
+</header>
+
+<div class="pagina">
+  @if (errorOperacion()) {
+    <p class="alert alert-danger mb-0" role="alert">{{ errorOperacion() }}</p>
+  }
+  @if (cargando()) {
+    <p class="panel superficie mb-0" role="status">Cargando ficha e inscripciones…</p>
+  } @else if (errorCarga()) {
+    <div class="alert alert-danger mb-0" role="alert">
+      <p>{{ errorCarga() }}</p>
+      <button class="btn btn-outline-primary btn-sm" type="button" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (participante(); as ficha) {
+    <section class="panel-amplio superficie d-grid gap-3" aria-labelledby="titulo-ficha">
+      <span class="etiqueta">Ficha del participante</span>
+      <header class="encabezado-pagina d-flex flex-wrap align-items-end justify-content-between gap-3">
+        <h1 id="titulo-ficha">{{ ficha.nombre }}</h1>
+        <button class="btn btn-peligro-secundario" type="button" [disabled]="eliminando()" (click)="eliminar(ficha)">
+          {{ eliminando() ? 'Eliminando…' : 'Eliminar participante' }}
+        </button>
+      </header>
+      <dl class="datos-ficha">
+        <div>
+          <dt>Correo</dt>
+          <dd class="dato-mono">{{ ficha.correo }}</dd>
+        </div>
+        <div>
+          <dt>Carrera</dt>
+          <dd>{{ ficha.carrera }}</dd>
+        </div>
+        <div>
+          <dt>Inscripciones registradas</dt>
+          <dd class="dato-mono">{{ inscripciones().length }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="d-grid gap-3" aria-labelledby="inscripciones-titulo">
+      <h2 id="inscripciones-titulo">Historial de inscripciones</h2>
+      @if (inscripciones().length) {
+        <div class="superficie">
+          <div class="table-responsive" tabindex="0" role="region" aria-labelledby="inscripciones-titulo">
+            <table class="table table-hover align-middle mb-0">
+              <caption class="visually-hidden">Evento, fecha de registro y estado de cada inscripción</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Evento</th>
+                  <th scope="col">Fecha de registro</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inscripcion of inscripciones(); track inscripcion.id) {
+                  <tr>
+                    <th scope="row">
+                      <a [routerLink]="['/admin/inscripciones', inscripcion.id]">{{ inscripcion.eventoTitulo }}</a>
+                    </th>
+                    <td class="dato-mono">
+                      <time [attr.datetime]="inscripcion.fechaRegistro">
+                        {{ inscripcion.fechaRegistro | date: 'dd/MM/yyyy HH:mm' : '-0500' }}
+                      </time>
+                    </td>
+                    <td>
+                      <span class="etiqueta estado text-nowrap" [class.estado-inactivo]="inscripcion.estado === 'CANCELADA'">
+                        {{ inscripcion.estado === 'CANCELADA' ? 'Cancelada' : 'Confirmada' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="texto-secundario small mb-0">Horarios de Lima, Perú</p>
+      } @else {
+        <p class="superficie panel mb-0 texto-secundario">Este participante todavía no tiene inscripciones.</p>
+      }
+    </section>
+  }
+</div>
+<app-confirmacion-inscripcion-dialog></app-confirmacion-inscripcion-dialog>

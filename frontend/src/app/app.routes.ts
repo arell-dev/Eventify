@@ -22,6 +22,30 @@ export const routes: Routes = [
       .then((modulo) => modulo.AdministracionComponent),
     children: [
       {
+        path: 'participantes',
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            title: 'Participantes | Eventos UTP',
+            loadComponent: () => import('./admin/participantes/participantes')
+              .then((modulo) => modulo.Participantes)
+          },
+          {
+            path: 'nuevo',
+            title: 'Registrar participante | Eventos UTP',
+            loadComponent: () => import('./admin/participantes/seleccionar-usuario')
+              .then((modulo) => modulo.SeleccionarUsuario)
+          },
+          {
+            path: ':id',
+            title: 'Detalle del participante | Eventos UTP',
+            loadComponent: () => import('./admin/participantes/participante-detalle')
+              .then((modulo) => modulo.ParticipanteDetalle)
+          }
+        ]
+      },
+      {
         path: 'inscripciones',
         title: 'Inscripciones | Eventos UTP',
         loadComponent: () => import('./admin/inscripciones/inscripciones.component')
