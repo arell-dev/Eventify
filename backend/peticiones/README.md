@@ -55,7 +55,9 @@ Las operaciones de escritura afectan al archivo local `backend/src/datos/eventif
 | [usuarios.http](./usuarios.http) | Inicio de sesión → consulta de cuentas y selectores. Para el ejemplo combinado, cambia el correo de prueba, crea la cuenta y luego registra sus dos perfiles. Usa las altas antes de consultar, editar o dar de baja el perfil correspondiente. Antes de un caso de baja bloqueada, confirma que el ID configurado tiene relaciones en su agenda o historial. |
 | [eventos.http](./eventos.http) | Las dos consultas públicas se pueden ejecutar sin sesión. Para el recorrido administrativo, inicia sesión, lista eventos y verifica que el ponente del cuerpo exista. Crea el evento antes de consultar su ficha e inscripciones, editarlo o eliminarlo. |
 | [inscripciones.http](./inscripciones.http) | Inicio de sesión → listado → crear evento futuro → inscribir a un participante existente → consultar → cancelar → reactivar → cancelar de nuevo → eliminar inscripción → eliminar evento. Si los perfiles iniciales cambiaron, consulta sus listados y ajusta `ponenteId` y `participanteId`. |
-| [catalogo.http](./catalogo.http) | Listar eventos públicos → iniciar sesión como usuario → consultar la inscripción propia → inscribirse. Usa el mismo ID de evento en el GET y POST, y elige uno futuro con cupo. El segundo inicio de sesión permite probar el `409` con código `PONENTE_ASIGNADO` en el evento del ponente. Si cambió la asignación local, ajusta el evento y la cuenta del ejemplo. Para marcar un aviso, lista primero las notificaciones propias del ponente y usa un ID de esa respuesta. La consulta administrativa del final debe dar `403` con la primera sesión. |
+| [catalogo.http](./catalogo.http) | Listar eventos públicos → iniciar sesión como usuario → consultar los IDs confirmados → inscribirse → cancelar. Elige un `eventoId` futuro con cupo y consulta de nuevo los IDs tras cada cambio. Repite la cancelación para comprobar que devuelve `200` sin liberar otro cupo. El segundo acceso prueba `PONENTE_ASIGNADO` en el evento del ponente. Para marcar un aviso, usa un ID del listado de esa cuenta. |
+
+Para observar los avisos en tiempo real, ejecuta `curl.exe -N http://localhost:3000/api/publico/cambios-inscripciones` en otra terminal. El flujo sigue abierto y emite el evento `inscripciones` con datos `{}` después de guardar un cambio. Usa `Ctrl+C` para cerrar la conexión.
 
 ## Si un bloque falla
 
@@ -63,7 +65,7 @@ Las operaciones de escritura afectan al archivo local `backend/src/datos/eventif
 | --- | --- |
 | Error de conexión | Verifica que el backend siga activo en el puerto `3000` y repite el estado de la API. |
 | `401` | Verifica la cuenta y la contraseña, o repite el inicio de sesión del archivo para renovar la cookie. |
-| `403` | Comprueba que la cuenta sea administradora y que la petición de escritura envíe el `Origin` indicado. |
+| `403` | Comprueba el rol de la ruta y que la petición de escritura envíe el `Origin` indicado. Las inscripciones propias requieren una cuenta de usuario. |
 | `400` o una variable sigue apareciendo como `{{...}}` | Ejecuta primero el bloque nombrado que devuelve el ID y confirma que respondió con éxito. Los IDs del JSON se envían como números. |
 | `404` | Revisa que el registro exista. En los dos recorridos nuevos se espera `404` al consultar la ficha después de eliminarla. |
 | `409` | Lee el campo `mensaje`. Los bloques marcados comprueban duplicados o bajas bloqueadas. Si ocurre al crear un evento, revisa que el ponente elegido tenga libre el horario. |

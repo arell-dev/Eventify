@@ -47,6 +47,9 @@
               Cancelar libera un cupo. Solo se puede cancelar antes de que comience el evento.
               Reactivar requiere que el evento siga siendo futuro y tenga disponibilidad.
             </div>
+            @if (formulario.controls.estado.dirty && formulario.controls.estado.value !== registro.estado) {
+              <p class="form-text mb-0" role="status">Estado actual: {{ registro.estado === 'CONFIRMADA' ? 'Confirmada' : 'Cancelada' }}.</p>
+            }
             @if (mostrarError()) {
               <div id="error-estado" class="mensaje-campo" role="alert">
                 Selecciona un estado válido.

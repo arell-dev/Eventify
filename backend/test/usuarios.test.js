@@ -3,17 +3,20 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
+const { setTimeout: esperar } = require("node:timers/promises");
 const { crearAlmacen } = require("../src/comun/almacen");
 const app = require("../src/app");
 const usuariosIniciales = require("../src/datos/datos-iniciales/usuarios.json");
 
-test("roles, identidad y reserva de cupo comparten el almacén", async (contexto) => {
+test("roles, identidad, cancelación y reserva de cupo comparten el almacén", { timeout: 10000 }, async (contexto) => {
   const directorio = await fs.mkdtemp(path.join(os.tmpdir(), "eventify-usuarios-"));
   const rutaDatos = path.join(directorio, "datos.json");
   const almacen = crearAlmacen({ rutaDatos });
   const servidor = app.crearApp({ almacen }).listen(0);
+  const conexion = new AbortController();
 
   contexto.after(async () => {
+    conexion.abort();
     await new Promise((resolver) => servidor.close(resolver));
     await fs.rm(directorio, { recursive: true, force: true });
   });
@@ -87,11 +90,18 @@ test("roles, identidad y reserva de cupo comparten el almacén", async (contexto
   assert.equal((await avisos.json()).length, 1);
 
   const rutaInscripcionPropia = `${base}/publico/eventos/${evento.id}/mi-inscripcion`;
+  const rutaMisInscripciones = `${base}/publico/mis-inscripciones`;
   const consultarInscripcion = (cookie) => fetch(rutaInscripcionPropia, { headers: { Cookie: cookie } });
+  const listarMisInscripciones = (cookie) => fetch(rutaMisInscripciones, { headers: { Cookie: cookie } });
   const inscribir = (cookie) => fetch(rutaInscripcionPropia, {
     method: "POST",
     headers: { ...cabeceras, Cookie: cookie },
     body: "{}"
+  });
+  const cancelar = (cookie, cuerpo = { estado: "CANCELADA" }, origen = cabeceras.Origin) => fetch(rutaInscripcionPropia, {
+    method: "PATCH",
+    headers: { ...cabeceras, Origin: origen, Cookie: cookie },
+    body: JSON.stringify(cuerpo)
   });
   const comprobarConflictoPonente = async (respuesta) => {
     assert.equal(respuesta.status, 409);
@@ -121,12 +131,12 @@ test("roles, identidad y reserva de cupo comparten el almacén", async (contexto
   });
   assert.equal(altaInscripcion.status, 201);
   const inscripcionAdministrativa = await altaInscripcion.json();
-  const cancelacion = await fetch(`${base}/inscripciones/${inscripcionAdministrativa.id}`, {
-    method: "PATCH",
-    headers: adminHeaders,
-    body: JSON.stringify({ estado: "CANCELADA" })
-  });
+  assert.equal((await (await consultarInscripcion(cuentaPonente.cookie)).json()).id, inscripcionAdministrativa.id);
+  assert.ok((await (await listarMisInscripciones(cuentaPonente.cookie)).json()).eventoIds.includes(evento.id));
+
+  const cancelacion = await cancelar(cuentaPonente.cookie);
   assert.equal(cancelacion.status, 200);
+  assert.deepEqual(await cancelacion.json(), { estado: "CANCELADA", cuposDisponibles: 1 });
   const antesDeReactivar = await fs.readFile(rutaDatos, "utf8");
   await comprobarConflictoPonente(await consultarInscripcion(cuentaPonente.cookie));
   await comprobarConflictoPonente(await inscribir(cuentaPonente.cookie));
@@ -160,4 +170,86 @@ test("roles, identidad y reserva de cupo comparten el almacén", async (contexto
   const datosReabiertos = await reabierto.leer();
   assert.equal(datosReabiertos.usuarios.find((item) => item.id === perfil.id).correo, "nuevo@example.com");
   assert.equal(datosReabiertos.inscripciones.filter((item) => item.eventoId === evento.id && item.estado === "CONFIRMADA").length, 1);
+
+  const cookieTitular = cookies[ganador];
+  const inscripcionTitular = inscripcionesPropias[ganador];
+  assert.ok((await (await listarMisInscripciones(cookieTitular)).json()).eventoIds.includes(evento.id));
+  assert.equal((await (await listarMisInscripciones(cookies[perdedor])).json()).eventoIds.includes(evento.id), false);
+  assert.equal((await fetch(rutaMisInscripciones)).status, 401);
+  assert.equal((await listarMisInscripciones(admin.cookie)).status, 403);
+  assert.equal((await cancelar("")).status, 401);
+  assert.equal((await cancelar(admin.cookie)).status, 403);
+  assert.equal((await cancelar(cookieTitular, { estado: "CONFIRMADA" })).status, 400);
+  assert.equal((await cancelar(cookieTitular, { estado: "CANCELADA", participanteId: 1 })).status, 400);
+  assert.equal((await cancelar(cookieTitular, { estado: "CANCELADA" }, "http://otro-origen.example")).status, 403);
+  assert.equal((await cancelar(cookies[perdedor])).status, 404);
+
+  const rutaCambios = `${base}/publico/cambios-inscripciones`;
+  assert.equal((await fetch(rutaCambios, { method: "HEAD" })).status, 200);
+
+  const flujo = await fetch(rutaCambios, {
+    signal: AbortSignal.any([conexion.signal, contexto.signal])
+  });
+  assert.match(flujo.headers.get("content-type"), /^text\/event-stream/);
+  assert.equal(flujo.headers.get("set-cookie"), null);
+  const lector = flujo.body.pipeThrough(new TextDecoderStream()).getReader();
+  let recibido = "";
+  const leerTrama = async () => {
+    while (!recibido.includes("\n\n")) {
+      const fragmento = await lector.read();
+      assert.equal(fragmento.done, false);
+      recibido += fragmento.value;
+    }
+
+    const fin = recibido.indexOf("\n\n");
+    const trama = recibido.slice(0, fin);
+    recibido = recibido.slice(fin + 2);
+
+    return trama;
+  };
+
+  assert.equal(await leerTrama(), ": conectado");
+  const cambioEsperado = "event: inscripciones\ndata: {}";
+  const transaccion = almacen.transaccion;
+  const escrituraFallida = contexto.mock.method(almacen, "transaccion", (operacion) => {
+    return transaccion(async (datos) => {
+      await operacion(datos);
+      throw new Error("Fallo de persistencia simulado.");
+    });
+  });
+  const proximoCambio = leerTrama();
+  assert.equal((await cancelar(cookieTitular)).status, 500);
+  escrituraFallida.mock.restore();
+  assert.equal(await Promise.race([proximoCambio, esperar(50)]), undefined);
+  assert.equal((await (await consultarInscripcion(cookieTitular)).json()).estado, "CONFIRMADA");
+
+  const cancelarTitular = await cancelar(cookieTitular);
+  assert.equal(cancelarTitular.status, 200);
+  assert.deepEqual(await cancelarTitular.json(), { estado: "CANCELADA", cuposDisponibles: 1 });
+  assert.equal(await proximoCambio, cambioEsperado);
+  assert.equal((await (await listarMisInscripciones(cookieTitular)).json()).eventoIds.includes(evento.id), false);
+  assert.equal((await (await fetch(`${base}/publico/eventos/${evento.id}`)).json()).cuposDisponibles, 1);
+  const historial = await fetch(`${base}/participantes/${inscripcionTitular.participanteId}/inscripciones`, { headers: adminHeaders });
+  const registroCancelado = (await historial.json()).find((item) => item.id === inscripcionTitular.id);
+  assert.equal(registroCancelado.estado, "CANCELADA");
+  assert.equal(registroCancelado.fechaRegistro, inscripcionTitular.fechaRegistro);
+
+  const siguienteCambio = leerTrama();
+  assert.equal((await cancelar(cookieTitular)).status, 200);
+  assert.equal(await Promise.race([siguienteCambio, esperar(50)]), undefined);
+  const reactivar = await fetch(`${base}/inscripciones/${inscripcionTitular.id}`, {
+    method: "PATCH",
+    headers: adminHeaders,
+    body: JSON.stringify({ estado: "CONFIRMADA" })
+  });
+  assert.equal(reactivar.status, 200);
+  assert.equal(await siguienteCambio, cambioEsperado);
+  assert.ok((await (await listarMisInscripciones(cookieTitular)).json()).eventoIds.includes(evento.id));
+
+  await almacen.transaccion((datosVigentes) => {
+    const eventoVigente = datosVigentes.eventos.find((item) => item.id === evento.id);
+    eventoVigente.inicio = new Date(Date.now() - 60000).toISOString();
+  });
+  assert.equal((await cancelar(cookieTitular)).status, 409);
+  assert.equal((await (await consultarInscripcion(cookieTitular)).json()).estado, "CONFIRMADA");
 });

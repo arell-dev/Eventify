@@ -2,6 +2,7 @@
 @origen = http://localhost:4200
 @correoUsuario = U24270382@utp.edu.pe
 @correoPonente = C242103@utp.edu.pe
+@eventoId = 1
 
 ### Consultar eventos sin iniciar sesión
 GET {{base}}/publico/eventos
@@ -18,17 +19,40 @@ Content-Type: application/json
   "contrasena": "{{contrasenaUsuario}}"
 }
 
-### Consultar la inscripción propia en el evento 1
-GET {{base}}/publico/eventos/1/mi-inscripcion
+### Listar los IDs de eventos con inscripción propia confirmada
+GET {{base}}/publico/mis-inscripciones
 Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
 
-### Inscribirse en el evento 1 si aún es futuro y tiene cupo
-POST {{base}}/publico/eventos/1/mi-inscripcion
+### Consultar la inscripción propia en el evento
+GET {{base}}/publico/eventos/{{eventoId}}/mi-inscripcion
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+
+### Inscribirse en el evento si aún es futuro y tiene cupo
+POST {{base}}/publico/eventos/{{eventoId}}/mi-inscripcion
 Origin: {{origen}}
 Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
 Content-Type: application/json
 
 {}
+
+### Cancelar la inscripción propia antes del inicio
+PATCH {{base}}/publico/eventos/{{eventoId}}/mi-inscripcion
+Origin: {{origen}}
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "estado": "CANCELADA"
+}
+
+### Intentar cancelar sin sesión (401)
+PATCH {{base}}/publico/eventos/{{eventoId}}/mi-inscripcion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "estado": "CANCELADA"
+}
 
 ### Iniciar sesión con el ponente asignado al evento 1
 # @name inicioPonente

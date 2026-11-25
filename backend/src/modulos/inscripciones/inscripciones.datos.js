@@ -25,11 +25,15 @@ const obtenerCuposDisponibles = (datos, evento) => {
   return evento.cupo - contarConfirmadas(datos, evento.id);
 };
 
+const buscarInscripcion = (datos, eventoId, participanteId) => {
+  return datos.inscripciones.find((inscripcion) => {
+    return inscripcion.eventoId === eventoId && inscripcion.participanteId === participanteId;
+  });
+};
+
 // Crea o reactiva el registro después de comprobar duplicados y disponibilidad.
 const confirmarInscripcion = (datos, evento, participanteId) => {
-  const existente = datos.inscripciones.find((inscripcion) => {
-    return inscripcion.eventoId === evento.id && inscripcion.participanteId === participanteId;
-  });
+  const existente = buscarInscripcion(datos, evento.id, participanteId);
 
   if (existente?.estado === "CONFIRMADA") {
     return { mensaje: "El participante ya tiene una inscripción confirmada en este evento." };
@@ -58,6 +62,23 @@ const confirmarInscripcion = (datos, evento, participanteId) => {
   return { inscripcion, reactivada: false };
 };
 
+// La cancelación cambia el estado del registro y conserva su historial.
+const cancelarInscripcion = (evento, inscripcion) => {
+  if (inscripcion.estado === "CANCELADA") {
+    return { cambiada: false };
+  }
+
+  const inicio = new Date(evento.inicio).getTime();
+
+  if (!Number.isFinite(inicio) || inicio <= Date.now()) {
+    return { mensaje: "No se puede cancelar una inscripción cuando el evento ya comenzó." };
+  }
+
+  inscripcion.estado = "CANCELADA";
+
+  return { cambiada: true };
+};
+
 // Agrega nombres y cupos actuales para que la interfaz no una datos por separado.
 const representarInscripcion = (datos, inscripcion) => {
   const evento = datos.eventos.find((elemento) => elemento.id === inscripcion.eventoId);
@@ -76,4 +97,4 @@ const representarInscripcion = (datos, inscripcion) => {
   };
 };
 
-module.exports = { contarConfirmadas, obtenerCuposDisponibles, representarInscripcion, verificarDisponibilidad, confirmarInscripcion };
+module.exports = { buscarInscripcion, cancelarInscripcion, confirmarInscripcion, contarConfirmadas, obtenerCuposDisponibles, representarInscripcion, verificarDisponibilidad };

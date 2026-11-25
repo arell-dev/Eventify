@@ -9,6 +9,6 @@ Desde `backend/`, ejecuta `npm.cmd test`. Node ejecuta los archivos `*.test.js` 
 | `eventos.test.js` | Creación y consulta de eventos, horarios, ponentes, cupos, inscripciones relacionadas y datos del catálogo público. |
 | `inscripciones.test.js` | Creación, cancelación, reactivación y eliminación de inscripciones, validaciones, cupos y solicitudes simultáneas por el último cupo. |
 | `perfiles.test.js` | Permisos, elegibilidad en el padrón, altas simultáneas, edición de ponentes, bajas, historial, agenda, cupos y persistencia de los perfiles. |
-| `usuarios.test.js` | Sesión, perfiles, notificaciones e inscripción pública. Comprueba el rechazo al ponente asignado incluso al reactivar una inscripción, la conservación de los datos y la competencia por el último cupo con un ponente de otro evento. |
+| `usuarios.test.js` | Sesión, perfiles, notificaciones, resumen y cancelación de inscripciones propias. Comprueba permisos, la regla del ponente, la competencia por el último cupo, el historial y la persistencia. Verifica los avisos en tiempo real tras la cancelación pública y la reactivación administrativa, incluidos un fallo de persistencia y un reintento idempotente. |
 
 Las pruebas de concurrencia comprueban el comportamiento de una instancia del backend. Las rutas HTTP pueden revisarse adicionalmente con `backend/peticiones/` y la integración visual desde el navegador.

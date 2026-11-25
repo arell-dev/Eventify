@@ -1,7 +1,8 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
+import { CambiosInscripcionesService } from '../../comunes/inscripciones/cambios-inscripciones.service';
 import { ParticipantesApi, mensajeDeError } from './participantes-api';
 import { Participante } from './participante.model';
 
@@ -14,7 +15,9 @@ import { Participante } from './participante.model';
 })
 export class Participantes {
   private readonly api = inject(ParticipantesApi);
+  private readonly cambios = inject(CambiosInscripcionesService);
   private readonly ciclo = inject(DestroyRef);
+  private consulta?: Subscription;
   private readonly participantes = signal<Participante[]>([]);
   protected readonly busqueda = signal('');
   protected readonly carrera = signal('');
@@ -39,18 +42,31 @@ export class Participantes {
 
   constructor() {
     this.cargar();
+    this.cambios.cambios.pipe(takeUntilDestroyed(this.ciclo)).subscribe(() => this.cargar(true));
   }
 
-  protected cargar() {
-    this.error.set('');
-    this.cargando.set(true);
+  protected cargar(enSegundoPlano = false) {
+    const mostrarCarga = !enSegundoPlano || this.cargando();
+    this.consulta?.unsubscribe();
 
-    this.api.listar().pipe(
+    if (mostrarCarga) {
+      this.error.set('');
+      this.cargando.set(true);
+    }
+
+    this.consulta = this.api.listar().pipe(
       takeUntilDestroyed(this.ciclo),
       finalize(() => this.cargando.set(false))
     ).subscribe({
-      next: (participantes) => this.participantes.set(participantes),
-      error: (error: unknown) => this.error.set(mensajeDeError(error))
+      next: (participantes) => {
+        this.error.set('');
+        this.participantes.set(participantes);
+      },
+      error: (error) => {
+        if (mostrarCarga || error.status === 401 || error.status === 403) {
+          this.error.set(mensajeDeError(error));
+        }
+      }
     });
   }
 }

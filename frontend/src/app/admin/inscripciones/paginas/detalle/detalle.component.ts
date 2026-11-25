@@ -2,6 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { CambiosInscripcionesService } from '../../../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../../../comunes/notificaciones/notificaciones.service';
 import { ConfirmacionService } from '../../componentes/confirmacion/confirmacion.service';
 import { Inscripcion } from '../../modelos/inscripcion.model';
@@ -20,9 +22,11 @@ export class InscripcionDetalleComponent implements OnInit {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly servicio = inject(InscripcionesService);
+  private readonly cambios = inject(CambiosInscripcionesService);
   private readonly notificaciones = inject(NotificacionesService);
   private readonly confirmacion = inject(ConfirmacionService);
   private readonly destroyRef = inject(DestroyRef);
+  private consulta?: Subscription;
 
   readonly inscripcion = signal<Inscripcion | null>(null);
   readonly cargando = signal(true);
@@ -35,12 +39,22 @@ export class InscripcionDetalleComponent implements OnInit {
       const id = Number(parametros.get('id'));
 
       if (!Number.isInteger(id) || id <= 0) {
+        this.consulta?.unsubscribe();
+        this.inscripcion.set(null);
         this.cargando.set(false);
         this.notificaciones.mostrar('El identificador de inscripción no es válido.', 'error');
         return;
       }
 
       this.cargarInscripcion(id);
+    });
+
+    this.cambios.cambios.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      const id = Number(this.ruta.snapshot.paramMap.get('id'));
+
+      if (Number.isSafeInteger(id) && id > 0) {
+        this.cargarInscripcion(id, true);
+      }
     });
   }
 
@@ -76,17 +90,26 @@ export class InscripcionDetalleComponent implements OnInit {
   }
 
   // Solicita una representación completa para mostrar la inscripción y sus relaciones.
-  cargarInscripcion(id: number): void {
-    this.cargando.set(true);
-    this.inscripcion.set(null);
+  cargarInscripcion(id: number, enSegundoPlano = false): void {
+    const mostrarCarga = !enSegundoPlano || this.cargando();
+    this.consulta?.unsubscribe();
 
-    this.servicio.obtenerPorId(id).subscribe({
+    if (mostrarCarga) {
+      this.cargando.set(true);
+      this.inscripcion.set(null);
+    }
+
+    this.consulta = this.servicio.obtenerPorId(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (inscripcion) => {
         this.inscripcion.set(inscripcion);
         this.cargando.set(false);
       },
       error: (error: HttpErrorResponse) => {
-        this.notificaciones.mostrar(this.obtenerMensajeError(error), 'error');
+        if (mostrarCarga || error.status === 401 || error.status === 403 || error.status === 404) {
+          this.inscripcion.set(null);
+          this.notificaciones.mostrar(this.obtenerMensajeError(error), 'error');
+        }
+
         this.cargando.set(false);
       }
     });

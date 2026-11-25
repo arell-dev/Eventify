@@ -1,10 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { finalize, Subscription } from 'rxjs';
+import { CambiosInscripcionesService } from '../../../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../../../comunes/notificaciones/notificaciones.service';
 import { EventoOpcion, ParticipanteOpcion } from '../../modelos/inscripcion.model';
 import { InscripcionesService } from '../../servicios/inscripciones.service';
@@ -20,14 +20,20 @@ import { InscripcionesService } from '../../servicios/inscripciones.service';
 export class InscripcionFormularioComponent implements OnInit {
   private readonly formularioBuilder = inject(NonNullableFormBuilder);
   private readonly servicio = inject(InscripcionesService);
+  private readonly cambios = inject(CambiosInscripcionesService);
   private readonly notificaciones = inject(NotificacionesService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cargandoEventosIniciales = signal(true);
+  private readonly cargandoParticipantesIniciales = signal(true);
+  private consultaEventos?: Subscription;
+  private consultaParticipantes?: Subscription;
+  private preseleccionarEventoOrigen = true;
 
   readonly eventos = signal<EventoOpcion[]>([]);
   readonly participantes = signal<ParticipanteOpcion[]>([]);
-  readonly cargandoCatalogos = signal(true);
+  readonly cargandoCatalogos = computed(() => this.cargandoEventosIniciales() || this.cargandoParticipantesIniciales());
   readonly guardando = signal(false);
   readonly envioIntentado = signal(false);
   readonly errorEventos = signal(false);
@@ -47,7 +53,12 @@ export class InscripcionFormularioComponent implements OnInit {
         this.actualizarParticipanteSeleccionado(valor);
       });
 
-    this.cargarCatalogos();
+    this.cargarEventos();
+    this.cargarParticipantes();
+    this.cambios.cambios.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.cargarEventos(true);
+      this.cargarParticipantes(true);
+    });
   }
 
   // Valida los catálogos y el formulario antes de crear la inscripción.
@@ -107,85 +118,67 @@ export class InscripcionFormularioComponent implements OnInit {
     });
   }
 
-  // Carga ambos catálogos y conserva el estado de error de cada uno por separado.
-  cargarCatalogos(): void {
-    this.cargandoCatalogos.set(true);
-    this.errorEventos.set(false);
-    this.errorParticipantes.set(false);
+  // Refresca cupos sin reemplazar una elección que sigue disponible.
+  cargarEventos(enSegundoPlano = false): void {
+    const cargaInicial = this.cargandoEventosIniciales();
+    this.consultaEventos?.unsubscribe();
+    this.cargandoEventosIniciales.set(cargaInicial);
 
-    forkJoin({
-      eventos: this.servicio.obtenerEventos().pipe(
-        catchError((error: HttpErrorResponse) => {
+    this.consultaEventos = this.servicio.obtenerEventos().pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.cargandoEventosIniciales.set(false))
+    ).subscribe({
+      next: (eventos) => {
+        this.errorEventos.set(false);
+        this.eventos.set(eventos);
+        const control = this.formulario.controls.eventoId;
+        const eventoId = Number(control.value) || (this.preseleccionarEventoOrigen ? this.eventoOrigen : null);
+        const evento = eventos.find((elemento) => elemento.id === eventoId);
+        this.preseleccionarEventoOrigen = false;
+
+        if (eventoId) {
+          control.setValue(evento && !this.eventoNoDisponible(evento) ? String(evento.id) : '');
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        if (!enSegundoPlano || cargaInicial || error.status === 401 || error.status === 403) {
           this.errorEventos.set(true);
           this.notificaciones.mostrar(
             `No se pudieron cargar los eventos. ${this.obtenerMensajeError(error)}`,
             'error'
           );
+        }
+      }
+    });
+  }
 
-          return of(null);
-        })
-      ),
-      participantes: this.servicio.obtenerParticipantes().pipe(
-        catchError((error: HttpErrorResponse) => {
+  cargarParticipantes(enSegundoPlano = false): void {
+    const cargaInicial = this.cargandoParticipantesIniciales();
+    this.consultaParticipantes?.unsubscribe();
+    this.cargandoParticipantesIniciales.set(cargaInicial);
+
+    this.consultaParticipantes = this.servicio.obtenerParticipantes().pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.cargandoParticipantesIniciales.set(false))
+    ).subscribe({
+      next: (participantes) => {
+        this.errorParticipantes.set(false);
+        this.participantes.set(participantes);
+        const control = this.formulario.controls.participanteId;
+        this.actualizarParticipanteSeleccionado(control.value);
+
+        if (control.value && !this.participanteSeleccionado()) {
+          control.setValue('');
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        if (!enSegundoPlano || cargaInicial || error.status === 401 || error.status === 403) {
           this.errorParticipantes.set(true);
           this.notificaciones.mostrar(
             `No se pudieron cargar los participantes. ${this.obtenerMensajeError(error)}`,
             'error'
           );
-
-          return of(null);
-        })
-      )
-    }).subscribe(({ eventos, participantes }) => {
-      if (eventos) {
-        this.eventos.set(eventos);
-        const eventoOrigen = eventos.find((evento) => evento.id === this.eventoOrigen);
-
-        if (eventoOrigen && !this.eventoNoDisponible(eventoOrigen)) {
-          this.formulario.controls.eventoId.setValue(String(eventoOrigen.id));
         }
-      }
-
-      if (participantes) {
-        this.participantes.set(participantes);
-        this.actualizarParticipanteSeleccionado(this.formulario.controls.participanteId.value);
-      }
-
-      this.cargandoCatalogos.set(false);
-    });
-  }
-
-  cargarEventos(): void {
-    this.errorEventos.set(false);
-
-    this.servicio.obtenerEventos().subscribe({
-      next: (eventos) => {
-        this.eventos.set(eventos);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorEventos.set(true);
-        this.notificaciones.mostrar(
-          `No se pudieron cargar los eventos. ${this.obtenerMensajeError(error)}`,
-          'error'
-        );
-      }
-    });
-  }
-
-  cargarParticipantes(): void {
-    this.errorParticipantes.set(false);
-
-    this.servicio.obtenerParticipantes().subscribe({
-      next: (participantes) => {
-        this.participantes.set(participantes);
-        this.actualizarParticipanteSeleccionado(this.formulario.controls.participanteId.value);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorParticipantes.set(true);
-        this.notificaciones.mostrar(
-          `No se pudieron cargar los participantes. ${this.obtenerMensajeError(error)}`,
-          'error'
-        );
       }
     });
   }

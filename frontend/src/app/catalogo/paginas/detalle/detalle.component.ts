@@ -1,14 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { catchError, distinctUntilChanged, filter, map, of, startWith, Subject, switchMap, takeUntil } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, map, merge, of, startWith, Subject, switchMap, takeUntil } from 'rxjs';
+import { ConfirmacionDialogComponent } from '../../../admin/inscripciones/componentes/confirmacion/confirmacion.component';
+import { CambiosInscripcionesService } from '../../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../../comunes/notificaciones/notificaciones.service';
 import { SesionService } from '../../../comunes/sesion/sesion.service';
 import { CabeceraPublicaComponent } from '../../componentes/cabecera/cabecera-publica';
 import { IconoCatalogoComponent } from '../../componentes/icono-catalogo';
 import { EventoPublico, InscripcionPropia } from '../../modelos/catalogo.model';
+import { CancelarInscripcionService } from '../../servicios/cancelar-inscripcion.service';
 import { CatalogoService } from '../../servicios/catalogo.service';
 import {
   enlaceEvento,
@@ -36,7 +39,8 @@ const esPonenteAsignado = (error: HttpErrorResponse): boolean => {
 
 @Component({
   selector: 'app-catalogo-detalle',
-  imports: [ReactiveFormsModule, RouterLink, CabeceraPublicaComponent, IconoCatalogoComponent],
+  imports: [ReactiveFormsModule, RouterLink, CabeceraPublicaComponent, IconoCatalogoComponent, ConfirmacionDialogComponent],
+  providers: [CancelarInscripcionService],
   templateUrl: './detalle.html',
   styleUrls: ['../../componentes/catalogo-publico.css', './detalle.css']
 })
@@ -45,12 +49,15 @@ export class CatalogoDetalleComponent {
   private readonly catalogo = inject(CatalogoService);
   private readonly sesionService = inject(SesionService);
   private readonly notificaciones = inject(NotificacionesService);
+  private readonly cambios = inject(CambiosInscripcionesService);
+  private readonly cancelar = inject(CancelarInscripcionService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly reloj = relojCatalogo();
 
   private readonly recargasEvento = new Subject<void>();
   private readonly recargasInscripcion = new Subject<void>();
   private readonly registro = signal<EventoPublico | null>(null);
+  private readonly tituloInscripcion = viewChild<ElementRef<HTMLHeadingElement>>('tituloInscripcion');
 
   private readonly eventoId = toSignal(this.ruta.paramMap.pipe(
     map((parametros) => Number(parametros.get('id'))),
@@ -82,6 +89,12 @@ export class CatalogoDetalleComponent {
   protected readonly consultaInscripcion = signal<ConsultaInscripcion>('inactiva');
   protected readonly inscripcion = signal<InscripcionPropia | null>(null);
   protected readonly procesando = signal(false);
+  protected readonly cancelando = this.cancelar.eventoEnProceso;
+  protected readonly puedeCancelar = computed(() => {
+    const evento = this.evento();
+
+    return Boolean(evento && this.inscripcion()?.estado === 'CONFIRMADA' && Date.parse(evento.inicio) > this.reloj());
+  });
   protected readonly formulario = new FormGroup({
     confirmacion: new FormControl(true, { nonNullable: true, validators: Validators.requiredTrue })
   });
@@ -126,7 +139,7 @@ export class CatalogoDetalleComponent {
     const contexto = this.contexto();
     const evento = this.evento();
 
-    if (!contexto || !evento || this.confirmacion.invalid || this.procesando()
+    if (!contexto || !evento || this.confirmacion.invalid || this.procesando() || this.cancelando() !== null
       || this.cargandoEvento() || this.errorEvento() || this.consultaInscripcion() !== 'lista'
       || this.inscripcion()?.estado === 'CONFIRMADA' || estadoEvento(evento, Date.now()) !== 'PROXIMO') {
       return;
@@ -143,6 +156,7 @@ export class CatalogoDetalleComponent {
         this.procesando.set(false);
         this.notificaciones.mostrar('Tu inscripción fue confirmada.');
         this.cargarEvento();
+        this.cargarInscripcion();
       },
       error: (error: HttpErrorResponse) => {
         this.procesando.set(false);
@@ -167,6 +181,35 @@ export class CatalogoDetalleComponent {
     });
   }
 
+  protected async cancelarInscripcion(origen: HTMLButtonElement): Promise<void> {
+    const contexto = this.contexto();
+    const evento = this.evento();
+
+    if (!contexto || !evento || !this.puedeCancelar() || this.procesando()) {
+      return;
+    }
+
+    const recargar = () => {
+      this.cargarEvento();
+      this.cargarInscripcion();
+    };
+    const cancelacion = await this.cancelar.solicitar(evento, () => this.contexto() === contexto, recargar);
+
+    if (!cancelacion || this.contexto() !== contexto) {
+      return;
+    }
+
+    const documento = origen.ownerDocument;
+
+    if (documento.activeElement === origen || (documento.activeElement === documento.body && !origen.isConnected)) {
+      this.tituloInscripcion()?.nativeElement.focus();
+    }
+
+    this.inscripcion.set({ estado: cancelacion.estado });
+    this.registro.update((registro) => registro ? { ...registro, cuposDisponibles: cancelacion.cuposDisponibles } : null);
+    recargar();
+  }
+
   // Al cambiar de evento se descartan las consultas anteriores.
   private observarEvento(): void {
     toObservable(this.eventoId).pipe(
@@ -180,10 +223,10 @@ export class CatalogoDetalleComponent {
           return of(null);
         }
 
-        return this.recargasEvento.pipe(
+        return merge(this.recargasEvento, this.cambios.cambios).pipe(
           startWith(undefined),
           switchMap(() => {
-            this.cargandoEvento.set(true);
+            this.cargandoEvento.set(!this.registro());
             this.errorEvento.set(null);
 
             return this.catalogo.obtener(eventoId).pipe(catchError((error: HttpErrorResponse) => {
@@ -193,7 +236,9 @@ export class CatalogoDetalleComponent {
                 this.registro.set(null);
               }
 
-              this.errorEvento.set(encontrado ? 'error' : 'no-encontrado');
+              if (!encontrado || !this.registro()) {
+                this.errorEvento.set(encontrado ? 'error' : 'no-encontrado');
+              }
 
               return of(this.registro());
             }));
@@ -213,17 +258,20 @@ export class CatalogoDetalleComponent {
         this.confirmacion.reset(true);
         this.inscripcion.set(null);
         this.procesando.set(false);
+        this.consultaInscripcion.set(contexto ? 'cargando' : 'inactiva');
 
         if (!contexto) {
-          this.consultaInscripcion.set('inactiva');
-
           return of(null);
         }
 
-        return this.recargasInscripcion.pipe(
+        return merge(this.recargasInscripcion, this.cambios.cambios).pipe(
           startWith(undefined),
           switchMap(() => {
-            this.consultaInscripcion.set('cargando');
+            const consultaAnterior = this.consultaInscripcion();
+
+            if (consultaAnterior !== 'lista' && consultaAnterior !== 'ponente-asignado') {
+              this.consultaInscripcion.set('cargando');
+            }
 
             return this.catalogo.consultarInscripcion(contexto.eventoId).pipe(
               map((inscripcion) => {
@@ -232,6 +280,11 @@ export class CatalogoDetalleComponent {
                 return inscripcion;
               }),
               catchError((error: HttpErrorResponse) => {
+                if (error.status !== 401 && !esPonenteAsignado(error)
+                  && (consultaAnterior === 'lista' || consultaAnterior === 'ponente-asignado')) {
+                  return of(this.inscripcion());
+                }
+
                 this.consultaInscripcion.set(esPonenteAsignado(error) ? 'ponente-asignado' : 'error');
 
                 if (error.status === 401) {

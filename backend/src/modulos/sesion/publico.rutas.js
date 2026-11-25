@@ -1,5 +1,5 @@
 const express = require("express");
-const { verificarDisponibilidad, representarInscripcion, confirmarInscripcion } = require("../inscripciones/inscripciones.datos");
+const { buscarInscripcion, cancelarInscripcion, confirmarInscripcion, obtenerCuposDisponibles, representarInscripcion, verificarDisponibilidad } = require("../inscripciones/inscripciones.datos");
 
 const conflictoPonenteAsignado = {
   codigo: "PONENTE_ASIGNADO",
@@ -8,6 +8,10 @@ const conflictoPonenteAsignado = {
 
 const esPonenteAsignado = (datos, evento, usuarioId) => {
   return datos.ponentes.some((ponente) => ponente.id === evento.ponenteId && ponente.usuarioId === usuarioId);
+};
+
+const buscarParticipanteDeUsuario = (datos, usuarioId) => {
+  return datos.participantes.find((participante) => participante.usuarioId === usuarioId);
 };
 
 const requiereUsuario = (solicitud, respuesta, siguiente) => {
@@ -24,12 +28,36 @@ const requiereUsuario = (solicitud, respuesta, siguiente) => {
   siguiente();
 };
 
-const crearRouter = ({ almacen }) => {
+const crearRouterMisInscripciones = ({ almacen }) => {
+  const router = express.Router();
+
+  router.get("/", requiereUsuario, async (solicitud, respuesta) => {
+    respuesta.set("Cache-Control", "no-store");
+
+    try {
+      const datos = await almacen.leer();
+      const participante = buscarParticipanteDeUsuario(datos, solicitud.session.perfil.id);
+      const eventoIds = participante ? datos.inscripciones
+        .filter((inscripcion) => inscripcion.participanteId === participante.id && inscripcion.estado === "CONFIRMADA")
+        .map((inscripcion) => inscripcion.eventoId) : [];
+
+      respuesta.json({ eventoIds });
+    } catch (error) {
+      respuesta.status(500).json({ mensaje: "No se pudieron consultar tus inscripciones." });
+    }
+  });
+
+  return router;
+};
+
+const crearRouter = ({ almacen, publicarCambio }) => {
   const router = express.Router();
   router.use(requiereUsuario);
 
   // Consulta la inscripción del usuario en el evento.
   router.get("/:id/mi-inscripcion", async (solicitud, respuesta) => {
+    respuesta.set("Cache-Control", "no-store");
+
     try {
       const datos = await almacen.leer();
       const evento = datos.eventos.find((item) => item.id === Number(solicitud.params.id));
@@ -39,16 +67,16 @@ const crearRouter = ({ almacen }) => {
         return;
       }
 
-      if (esPonenteAsignado(datos, evento, solicitud.session.perfil.id)) {
+      const usuarioId = solicitud.session.perfil.id;
+      const participante = buscarParticipanteDeUsuario(datos, usuarioId);
+      const inscripcion = participante && buscarInscripcion(datos, evento.id, participante.id);
+
+      // Un ponente puede consultar y cancelar una confirmación administrativa propia.
+      if (inscripcion?.estado !== "CONFIRMADA" && esPonenteAsignado(datos, evento, usuarioId)) {
         respuesta.status(409).json(conflictoPonenteAsignado);
         return;
       }
 
-      const participante = datos.participantes.find((item) => item.usuarioId === solicitud.session.perfil.id);
-      const inscripcion = participante && datos.inscripciones.find((item) => {
-        return item.eventoId === evento.id && item.participanteId === participante.id;
-      });
-      
       respuesta.json(inscripcion ? representarInscripcion(datos, inscripcion) : null);
     } catch (error) {
       respuesta.status(500).json({ mensaje: "No se pudo consultar la inscripción." });
@@ -81,10 +109,8 @@ const crearRouter = ({ almacen }) => {
           throw Object.assign(new Error(conflictoPonenteAsignado.mensaje), { codigo: conflictoPonenteAsignado.codigo });
         }
 
-        let participante = datos.participantes.find((item) => item.usuarioId === usuario.id);
-        const inscripcion = participante && datos.inscripciones.find((item) => {
-          return item.eventoId === evento.id && item.participanteId === participante.id;
-        });
+        let participante = buscarParticipanteDeUsuario(datos, usuario.id);
+        const inscripcion = participante && buscarInscripcion(datos, evento.id, participante.id);
         
         if (inscripcion?.estado === "CONFIRMADA") {
           return { estado: 409, mensaje: "Ya tienes una inscripción confirmada." };
@@ -117,6 +143,11 @@ const crearRouter = ({ almacen }) => {
           inscripcion: representarInscripcion(datos, resultado.inscripcion)
         };
       });
+
+      if (resultado.inscripcion) {
+        publicarCambio?.();
+      }
+
       respuesta.status(resultado.estado).json(resultado.inscripcion || { mensaje: resultado.mensaje });
     } catch (error) {
       if (error.codigo === conflictoPonenteAsignado.codigo) {
@@ -125,6 +156,64 @@ const crearRouter = ({ almacen }) => {
       }
 
       respuesta.status(error.estado || 500).json({ mensaje: error.estado ? error.message : "No se pudo completar la inscripción." });
+    }
+  });
+
+  // Cancela solo la inscripción vinculada a la cuenta de la sesión.
+  router.patch("/:id/mi-inscripcion", async (solicitud, respuesta) => {
+    if (solicitud.get("Origin") !== "http://localhost:4200") {
+      respuesta.status(403).json({ mensaje: "El origen de la solicitud no está permitido." });
+      return;
+    }
+
+    const cuerpo = solicitud.body;
+    const eventoId = Number(solicitud.params.id);
+
+    if (!Number.isSafeInteger(eventoId) || eventoId <= 0) {
+      respuesta.status(400).json({ mensaje: "El ID de evento debe ser un entero positivo." });
+      return;
+    }
+
+    if (cuerpo?.estado !== "CANCELADA" || Object.keys(cuerpo).length !== 1 || !Object.hasOwn(cuerpo, "estado")) {
+      respuesta.status(400).json({ mensaje: "Envía únicamente el estado CANCELADA." });
+      return;
+    }
+
+    try {
+      const resultado = await almacen.transaccion((datos) => {
+        const evento = datos.eventos.find((item) => item.id === eventoId);
+        const usuario = datos.usuarios.find((item) => item.id === solicitud.session.perfil.id && item.rol === "USUARIO");
+
+        if (!evento || !usuario) {
+          throw Object.assign(new Error("El evento o usuario no existe."), { estado: 404 });
+        }
+
+        const participante = buscarParticipanteDeUsuario(datos, usuario.id);
+        const inscripcion = participante && buscarInscripcion(datos, evento.id, participante.id);
+
+        if (!inscripcion) {
+          throw Object.assign(new Error("No tienes una inscripción en este evento."), { estado: 404 });
+        }
+
+        const { mensaje, cambiada } = cancelarInscripcion(evento, inscripcion);
+
+        if (mensaje) {
+          throw Object.assign(new Error(mensaje), { estado: 409 });
+        }
+
+        return {
+          cambiada,
+          inscripcion: { estado: inscripcion.estado, cuposDisponibles: obtenerCuposDisponibles(datos, evento) }
+        };
+      });
+
+      if (resultado.cambiada) {
+        publicarCambio?.();
+      }
+
+      respuesta.json(resultado.inscripcion);
+    } catch (error) {
+      respuesta.status(error.estado || 500).json({ mensaje: error.estado ? error.message : "No se pudo cancelar la inscripción." });
     }
   });
 
@@ -183,4 +272,4 @@ const crearRouterNotificaciones = ({ almacen }) => {
   return router;
 };
 
-module.exports = { crearRouter, crearRouterNotificaciones };
+module.exports = { crearRouter, crearRouterMisInscripciones, crearRouterNotificaciones };

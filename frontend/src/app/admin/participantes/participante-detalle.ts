@@ -2,7 +2,8 @@ import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, Subscription } from 'rxjs';
+import { CambiosInscripcionesService } from '../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../comunes/notificaciones/notificaciones.service';
 import { ConfirmacionDialogComponent } from '../inscripciones/componentes/confirmacion/confirmacion.component';
 import { ConfirmacionService } from '../inscripciones/componentes/confirmacion/confirmacion.service';
@@ -18,6 +19,7 @@ import { ParticipantesApi, mensajeDeError } from './participantes-api';
 })
 export class ParticipanteDetalle {
   private readonly api = inject(ParticipantesApi);
+  private readonly cambios = inject(CambiosInscripcionesService);
   private readonly router = inject(Router);
   private readonly ciclo = inject(DestroyRef);
   private readonly confirmacion = inject(ConfirmacionService);
@@ -30,6 +32,7 @@ export class ParticipanteDetalle {
   protected readonly errorCarga = signal('');
   protected readonly errorOperacion = signal('');
   private confirmando = false;
+  private consulta?: Subscription;
 
   constructor() {
     this.ciclo.onDestroy(() => {
@@ -39,13 +42,19 @@ export class ParticipanteDetalle {
     });
 
     this.cargar();
+    this.cambios.cambios.pipe(takeUntilDestroyed(this.ciclo)).subscribe(() => this.cargar(true));
   }
 
-  protected cargar() {
-    this.errorCarga.set('');
-    this.cargando.set(true);
+  protected cargar(enSegundoPlano = false) {
+    const mostrarCarga = !enSegundoPlano || !this.participante();
+    this.consulta?.unsubscribe();
 
-    forkJoin({
+    if (mostrarCarga) {
+      this.errorCarga.set('');
+      this.cargando.set(true);
+    }
+
+    this.consulta = forkJoin({
       participante: this.api.obtener(this.id),
       inscripciones: this.api.consultarInscripciones(this.id)
     }).pipe(
@@ -53,10 +62,15 @@ export class ParticipanteDetalle {
       finalize(() => this.cargando.set(false))
     ).subscribe({
       next: ({ participante, inscripciones }) => {
+        this.errorCarga.set('');
         this.participante.set(participante);
         this.inscripciones.set(inscripciones);
       },
-      error: (error: unknown) => this.errorCarga.set(mensajeDeError(error))
+      error: (error) => {
+        if (mostrarCarga || error.status === 401 || error.status === 403 || error.status === 404) {
+          this.errorCarga.set(mensajeDeError(error));
+        }
+      }
     });
   }
 
