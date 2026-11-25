@@ -1,0 +1,155 @@
+@base = http://localhost:3000/api
+@origen = http://localhost:4200
+@adminCorreo = C25170@utp.edu.pe
+@inicioEvento = 2035-03-10T15:00:00.000Z
+@finEvento = 2035-03-10T16:00:00.000Z
+
+### 01. Iniciar sesión administrativa (200)
+# @name inicioParticipantes
+# @prompt password Contraseña de la cuenta administradora de Eventify
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "{{adminCorreo}}",
+  "contrasena": "{{password}}"
+}
+
+### 02. Listar participantes (200)
+GET {{base}}/participantes
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 03. Crear una cuenta de prueba en el padrón (201)
+# @name cuentaParticipantes
+POST {{base}}/usuarios
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "nombre": "Prueba de Participantes",
+  "correo": "participante-{{$guid}}@eventify.test",
+  "carrera": "Ingeniería de Sistemas",
+  "especialidad": "Desarrollo web",
+  "contrasena": "DemoParticipantes2026!"
+}
+
+### 04. Consultar el selector de usuarios disponibles (200)
+GET {{base}}/participantes/usuarios-disponibles
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 05. Registrar la cuenta como participante (201)
+# @name altaParticipante
+POST {{base}}/participantes
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{cuentaParticipantes.response.body.$.id}}
+}
+
+### 06. Consultar la ficha creada (200)
+GET {{base}}/participantes/{{altaParticipante.response.body.$.id}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 07. Consultar el historial inicial (200, [])
+GET {{base}}/participantes/{{altaParticipante.response.body.$.id}}/inscripciones
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 08. Comprobar que el alta duplicada se bloquea (409)
+POST {{base}}/participantes
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{cuentaParticipantes.response.body.$.id}}
+}
+
+### 09. Registrar un ponente de prueba con la misma cuenta (201)
+# @name ponenteParaHistorial
+POST {{base}}/ponentes
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{cuentaParticipantes.response.body.$.id}}
+}
+
+### 10. Crear un evento futuro con el ponente de prueba (201)
+# @name eventoParaHistorial
+POST {{base}}/eventos
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "titulo": "Taller de prueba de Participantes",
+  "descripcion": "Evento para verificar el historial de un participante.",
+  "tipo": "TALLER",
+  "modalidad": "VIRTUAL",
+  "lugar": "",
+  "enlace": "https://example.com/participantes",
+  "inicio": "{{inicioEvento}}",
+  "fin": "{{finEvento}}",
+  "cupo": 2,
+  "ponenteId": {{ponenteParaHistorial.response.body.$.id}}
+}
+
+### 11. Inscribir al participante de prueba (201)
+# @name inscripcionParaHistorial
+POST {{base}}/inscripciones
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "eventoId": {{eventoParaHistorial.response.body.$.id}},
+  "participanteId": {{altaParticipante.response.body.$.id}}
+}
+
+### 12. Consultar el historial con el título del evento (200)
+GET {{base}}/participantes/{{altaParticipante.response.body.$.id}}/inscripciones
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 13. Cancelar la inscripción de prueba (200)
+PATCH {{base}}/inscripciones/{{inscripcionParaHistorial.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "estado": "CANCELADA"
+}
+
+### 14. Comprobar que una inscripción cancelada impide la baja (409)
+DELETE {{base}}/participantes/{{altaParticipante.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 15. Eliminar la inscripción cancelada (200)
+DELETE {{base}}/inscripciones/{{inscripcionParaHistorial.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 16. Eliminar el evento de prueba (200)
+DELETE {{base}}/eventos/{{eventoParaHistorial.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 17. Eliminar el ponente auxiliar de prueba (200)
+DELETE {{base}}/ponentes/{{ponenteParaHistorial.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 18. Eliminar el participante sin inscripciones (200)
+DELETE {{base}}/participantes/{{altaParticipante.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
+
+### 19. Comprobar que la ficha se eliminó (404)
+GET {{base}}/participantes/{{altaParticipante.response.body.$.id}}
+Cookie: {{inicioParticipantes.response.headers.Set-Cookie}}
