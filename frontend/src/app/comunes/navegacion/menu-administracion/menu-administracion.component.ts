@@ -47,7 +47,7 @@ export class MenuAdministracionComponent {
       nombre: 'Inicio',
       ruta: '/admin/inicio',
       icono: 'M3 13h8V3H3zm10 8h8v-6h-8zm0-10h8V3h-8zm-10 10h8v-6H3z',
-      disponible: false
+      disponible: true
     },
     {
       nombre: 'Eventos',

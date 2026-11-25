@@ -1,0 +1,18 @@
+<section class="d-flex flex-column gap-3" aria-labelledby="titulo-modulos-inicio">
+  <h2 id="titulo-modulos-inicio" class="titulo-seccion mb-0">Módulos del sistema</h2>
+  <div class="row row-cols-1 row-cols-md-2 g-3 modulos-inicio">
+    @for (modulo of modulos; track modulo.ruta) {
+      <div class="col">
+        <a class="card tarjeta-modulo h-100 text-decoration-none" [routerLink]="modulo.ruta">
+          <div class="card-body d-flex flex-column gap-1 p-4">
+            <header class="d-flex align-items-center justify-content-between gap-2">
+              <h3 class="nombre-modulo mb-0">{{ modulo.nombre }}</h3>
+              <span class="flecha-modulo" aria-hidden="true">arrow_forward</span>
+            </header>
+            <p class="descripcion-modulo mb-0">{{ modulo.descripcion }}</p>
+          </div>
+        </a>
+      </div>
+    }
+  </div>
+</section>

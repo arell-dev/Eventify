@@ -22,6 +22,17 @@ export const routes: Routes = [
       .then((modulo) => modulo.AdministracionComponent),
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'inicio'
+      },
+      {
+        path: 'inicio',
+        title: 'Inicio | Eventos UTP',
+        loadComponent: () => import('./admin/inicio/paginas/panel/panel.component')
+          .then((modulo) => modulo.InicioPanelComponent)
+      },
+      {
         path: 'eventos',
         loadChildren: () => import('./admin/eventos/eventos.routes')
           .then((modulo) => modulo.rutasEventos)

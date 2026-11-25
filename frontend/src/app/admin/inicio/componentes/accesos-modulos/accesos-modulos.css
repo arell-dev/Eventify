@@ -1,0 +1,50 @@
+.titulo-seccion {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.625rem;
+}
+
+.tarjeta-modulo {
+  --bs-card-border-radius: var(--radio-tarjeta-inicio);
+  transition: border-color 120ms ease-out;
+}
+
+.tarjeta-modulo:hover {
+  border-color: var(--color-principal);
+}
+
+.nombre-modulo {
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.375rem;
+}
+
+.descripcion-modulo {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.1px;
+}
+
+.flecha-modulo {
+  width: 1em;
+  flex: none;
+  overflow: hidden;
+  color: var(--color-principal);
+  font: 400 1.25rem / 1 'Material Symbols Inicio';
+  white-space: nowrap;
+}
+
+@media (min-width: 1280px) {
+  .modulos-inicio > .col {
+    width: 25%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-modulo {
+    transition: none;
+  }
+}

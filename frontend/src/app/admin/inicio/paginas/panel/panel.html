@@ -1,0 +1,18 @@
+<div class="pagina-inicio d-flex flex-column gap-4 mx-auto">
+  <header class="cabecera-inicio d-flex justify-content-between gap-3">
+    <div class="d-grid gap-1">
+      <h1 class="titulo-inicio mb-0">Panel general de Eventos UTP</h1>
+      <p class="resumen-inicio mb-0">Resumen operativo de actividades, cupos disponibles y usuarios asignados.</p>
+    </div>
+    <a class="btn btn-primary boton-crear d-inline-flex align-items-center justify-content-center gap-2" routerLink="/admin/eventos/nuevo">
+      <span class="icono-inicio" aria-hidden="true">add</span>
+      Crear evento
+    </a>
+  </header>
+
+  <app-indicadores-inicio [indicadores]="indicadores()" [cargando]="cargando()"></app-indicadores-inicio>
+
+  <app-accesos-modulos></app-accesos-modulos>
+
+  <app-proximos-eventos [eventos]="proximosEventos()" [cargando]="cargando()" [noDisponibles]="eventosNoDisponibles()"></app-proximos-eventos>
+</div>

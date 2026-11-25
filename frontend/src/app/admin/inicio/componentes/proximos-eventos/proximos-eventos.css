@@ -1,0 +1,104 @@
+.titulo-seccion {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.625rem;
+}
+
+.enlace-todos {
+  color: var(--color-principal);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  letter-spacing: 0.1px;
+  text-decoration: none;
+}
+
+.enlace-todos:hover {
+  text-decoration: underline;
+}
+
+.contenedor-proximos,
+.mensaje-proximos {
+  --bs-card-border-radius: var(--radio-tarjeta-inicio);
+}
+
+.mensaje-proximos {
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+}
+
+.tabla-proximos {
+  --bs-table-bg: var(--color-superficie);
+  --bs-table-color: var(--color-texto);
+  --bs-table-hover-bg: var(--color-superficie-suave);
+  --bs-table-hover-color: var(--color-texto);
+  --bs-table-border-color: var(--color-borde);
+}
+
+.tabla-proximos thead th {
+  padding: 0.75rem 1rem;
+  color: var(--color-texto-secundario);
+  background-color: var(--color-superficie-suave);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+  letter-spacing: 0.25px;
+  white-space: nowrap;
+}
+
+.tabla-proximos tbody :is(th, td) {
+  padding: 0.875rem 1rem;
+  line-height: 1.5rem;
+}
+
+.tabla-proximos tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.enlace-evento {
+  color: var(--color-texto);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.enlace-evento:hover {
+  color: var(--color-principal);
+  text-decoration: underline;
+}
+
+.tabla-proximos .dato-evento {
+  color: var(--color-texto-secundario);
+  font: 500 0.8125rem / 1.125rem 'Spline Sans Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.etiqueta-evento {
+  padding: 0.125rem 0.625rem;
+  background-color: #efe6e7;
+  color: var(--color-texto-secundario);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 0.875rem;
+  letter-spacing: 0.3px;
+}
+
+.etiqueta-evento[data-modalidad='PRESENCIAL'] {
+  background-color: var(--color-informacion-fondo-inicio);
+  color: #00363d;
+}
+
+.etiqueta-evento[data-modalidad='HIBRIDO'] {
+  background-color: var(--color-advertencia-suave);
+  color: #78350f;
+}
+
+.etiqueta-proximo {
+  background-color: var(--color-confirmada-suave);
+  color: #0f5132;
+}
+
+.etiqueta-agotado {
+  background-color: var(--color-error-suave);
+  color: #93000a;
+}
