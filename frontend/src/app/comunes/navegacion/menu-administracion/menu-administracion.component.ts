@@ -53,7 +53,7 @@ export class MenuAdministracionComponent {
       nombre: 'Eventos',
       ruta: '/admin/eventos',
       icono: 'M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2z',
-      disponible: false
+      disponible: true
     },
     {
       nombre: 'Participantes',

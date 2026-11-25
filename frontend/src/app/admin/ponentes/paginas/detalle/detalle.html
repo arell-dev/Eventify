@@ -88,7 +88,7 @@
                   @let estado = estadoAgenda(evento);
                   <tr>
                     <th scope="row">
-                      <span class="enlace-agenda d-block fw-semibold">{{ evento.titulo }}</span>
+                      <a class="enlace-agenda d-block fw-semibold" [routerLink]="['/admin/eventos', evento.id]">{{ evento.titulo }}</a>
                       <span class="d-block dato-secundario">{{ evento.tipo }}</span>
                       @if (evento.lugar) {
                         <span class="d-block dato-secundario">{{ evento.lugar }}</span>
@@ -115,7 +115,7 @@
               @let estado = estadoAgenda(evento);
               <li class="evento-movil list-group-item">
                 <article>
-                  <h3><span class="enlace-agenda">{{ evento.titulo }}</span></h3>
+                  <h3><a class="enlace-agenda" [routerLink]="['/admin/eventos', evento.id]">{{ evento.titulo }}</a></h3>
                   <p class="tipo-evento">{{ evento.tipo }}</p>
                   <dl class="datos-evento-movil">
                     <div>

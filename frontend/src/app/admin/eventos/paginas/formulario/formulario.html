@@ -1,0 +1,123 @@
+<app-volver-eventos></app-volver-eventos>
+
+<div class="pagina-eventos pagina-formulario">
+  <header class="d-grid gap-1">
+    <h1 id="titulo-formulario" class="titulo-pagina">{{ id() ? 'Editar evento' : 'Registrar evento' }}</h1>
+    <p class="subtitulo-pagina">Define los datos de la actividad y selecciona al ponente.</p>
+  </header>
+
+  @if (cargando()) {
+    <p class="card mensaje-eventos" role="status">Cargando formulario…</p>
+  } @else if (noEncontrado()) {
+    <p class="card mensaje-eventos" role="status">No se encontró el evento.</p>
+  } @else if (error()) {
+    <div class="alert alert-danger mensaje-eventos">
+      <p class="mb-2" role="alert">{{ error() }}</p>
+      <button class="btn btn-reintentar" type="button" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <form #formularioElement class="card" method="post" aria-labelledby="titulo-formulario" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <div class="card-body campos-formulario">
+        <div class="campo-evento">
+          <label for="titulo">Título del evento</label>
+          <input id="titulo" name="titulo" class="form-control" type="text" formControlName="titulo" required placeholder="Ej. Arquitectura Cloud con Angular y Express" [attr.aria-invalid]="errorDe('titulo') ? 'true' : null" [attr.aria-describedby]="errorDe('titulo') ? 'error-titulo' : null">
+          <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'titulo' }"></ng-container>
+        </div>
+
+        <div class="campo-evento">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" name="descripcion" class="form-control" formControlName="descripcion" rows="3" required placeholder="Resumen de objetivos, público y temario del evento…" [attr.aria-invalid]="errorDe('descripcion') ? 'true' : null" [attr.aria-describedby]="errorDe('descripcion') ? 'error-descripcion' : null"></textarea>
+          <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'descripcion' }"></ng-container>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-sm-6 campo-evento">
+            <label for="tipo">Tipo de actividad</label>
+            <select id="tipo" name="tipo" class="form-select" formControlName="tipo" required [attr.aria-invalid]="errorDe('tipo') ? 'true' : null" [attr.aria-describedby]="errorDe('tipo') ? 'error-tipo' : null">
+              <option value="">Selecciona un tipo</option>
+              @for (tipo of tipos(); track tipo.valor) {
+                <option [value]="tipo.valor">{{ tipo.etiqueta }}</option>
+              }
+            </select>
+            <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'tipo' }"></ng-container>
+          </div>
+
+          <div class="col-sm-6 campo-evento">
+            <label for="modalidad">Modalidad</label>
+            <select id="modalidad" name="modalidad" class="form-select" formControlName="modalidad" required>
+              <option value="PRESENCIAL">Presencial (requiere lugar)</option>
+              <option value="VIRTUAL">Virtual (requiere enlace)</option>
+              <option value="HIBRIDO">Híbrido (requiere lugar y enlace)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          @if (requiereLugar(formulario.controls.modalidad.value)) {
+            <div class="col-sm-6 campo-evento">
+              <label for="lugar">Lugar presencial</label>
+              <input id="lugar" name="lugar" class="form-control" type="text" formControlName="lugar" required placeholder="Ej. Auditorio UTP Piura" [attr.aria-invalid]="errorDe('lugar') ? 'true' : null" [attr.aria-describedby]="errorDe('lugar') ? 'error-lugar' : null">
+              <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'lugar' }"></ng-container>
+            </div>
+          }
+
+          @if (requiereEnlace(formulario.controls.modalidad.value)) {
+            <div class="col-sm-6 campo-evento">
+              <label for="enlace">Enlace de transmisión</label>
+              <input id="enlace" name="enlace" class="form-control" type="url" formControlName="enlace" required placeholder="https://" [attr.aria-invalid]="errorDe('enlace') ? 'true' : null" [attr.aria-describedby]="errorDe('enlace') ? 'error-enlace' : null">
+              <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'enlace' }"></ng-container>
+            </div>
+          }
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4 campo-evento">
+            <label for="inicio">Inicio</label>
+            <input id="inicio" name="inicio" class="form-control" type="datetime-local" formControlName="inicio" step="any" required [attr.aria-invalid]="errorDe('inicio') ? 'true' : null" [attr.aria-describedby]="errorDe('inicio') ? 'error-inicio zona-horaria' : 'zona-horaria'">
+            <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'inicio' }"></ng-container>
+          </div>
+
+          <div class="col-md-4 campo-evento">
+            <label for="fin">Fin</label>
+            <input id="fin" name="fin" class="form-control" type="datetime-local" formControlName="fin" step="any" required [attr.aria-invalid]="errorDe('fin') ? 'true' : null" [attr.aria-describedby]="errorDe('fin') ? 'error-fin zona-horaria' : 'zona-horaria'">
+            <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'fin' }"></ng-container>
+          </div>
+
+          <div class="col-md-4 campo-evento">
+            <label for="cupo">Cupo máximo</label>
+            <input id="cupo" name="cupo" class="form-control" type="number" formControlName="cupo" min="1" step="1" required [attr.aria-invalid]="errorDe('cupo') ? 'true' : null" [attr.aria-describedby]="errorDe('cupo') ? 'error-cupo' : null">
+            <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'cupo' }"></ng-container>
+          </div>
+        </div>
+        <p id="zona-horaria" class="ayuda-campo">Horarios de Lima.</p>
+
+        <div class="campo-evento seleccion-ponente">
+          <label for="ponenteId">Escoge el ponente</label>
+          <select id="ponenteId" name="ponenteId" class="form-select" formControlName="ponenteId" required [attr.aria-invalid]="errorDe('ponenteId') ? 'true' : null" [attr.aria-describedby]="errorDe('ponenteId') ? 'error-ponenteId ayuda-ponente' : 'ayuda-ponente'">
+            <option [ngValue]="null">Selecciona un ponente</option>
+            @for (ponente of ponentes(); track ponente.id) {
+              <option [ngValue]="ponente.id">{{ ponente.nombre }} · {{ ponente.correo }} ({{ ponente.especialidad }})</option>
+            }
+          </select>
+          <ng-container *ngTemplateOutlet="errorCampo; context: { $implicit: 'ponenteId' }"></ng-container>
+          @if (!ponentes().length) {
+            <p id="ayuda-ponente" class="ayuda-campo mb-0" role="status">No hay ponentes disponibles.</p>
+          } @else {
+            <p id="ayuda-ponente" class="ayuda-campo mb-0">El horario del ponente se comprueba al guardar.</p>
+          }
+        </div>
+      </div>
+
+      <div class="acciones-formulario d-flex flex-column flex-sm-row justify-content-sm-end gap-2">
+        <a class="btn btn-secundario boton-eventos" [routerLink]="id() ? ['/admin/eventos', id()] : ['/admin/eventos']">Cancelar</a>
+        <button class="btn btn-principal boton-eventos" type="submit" [disabled]="guardando() || !ponentes().length">{{ guardando() ? 'Guardando…' : 'Guardar evento' }}</button>
+      </div>
+    </form>
+  }
+</div>
+
+<ng-template #errorCampo let-campo>
+  @if (errorDe(campo); as mensaje) {
+    <span class="error-campo" [id]="'error-' + campo">{{ mensaje }}</span>
+  }
+</ng-template>

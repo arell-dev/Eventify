@@ -1,0 +1,84 @@
+<app-volver-eventos></app-volver-eventos>
+
+<div class="pagina-eventos">
+  @if (cargando()) {
+    <p class="card mensaje-eventos" role="status">Cargando evento…</p>
+  } @else if (noEncontrado()) {
+    <h1 class="titulo-pagina">Evento no encontrado</h1>
+  } @else if (error()) {
+    <div class="alert alert-danger mensaje-eventos">
+      <p class="mb-2" role="alert">{{ error() }}</p>
+      <button class="btn btn-reintentar" type="button" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (evento(); as registro) {
+    <section class="card" aria-labelledby="titulo-evento">
+      <div class="card-body ficha-evento">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge distintivo-modalidad" [class.modalidad-virtual]="registro.modalidad === 'VIRTUAL'" [class.modalidad-hibrida]="registro.modalidad === 'HIBRIDO'">{{ modalidades[registro.modalidad] }}</span>
+            <span class="badge distintivo-estado" [class.estado-proximo]="estado() === 'Próximo'">{{ estado() }}</span>
+            @if (registro.cuposDisponibles === 0) {
+              <span class="badge distintivo-agotado">Agotado</span>
+            }
+            <span class="badge distintivo-tipo">{{ etiquetaTipo(registro.tipo) }}</span>
+          </div>
+          <a class="btn btn-secundario boton-eventos d-inline-flex align-items-center gap-2" [routerLink]="['/admin/eventos', registro.id, 'editar']">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/></svg>
+            Editar evento
+          </a>
+        </div>
+
+        <div class="d-grid gap-3">
+          <h1 id="titulo-evento" class="titulo-pagina">{{ registro.titulo }}</h1>
+          <p class="descripcion-evento mb-0">{{ registro.descripcion }}</p>
+        </div>
+
+        <dl class="datos-evento">
+          <div>
+            <dt>Ponente</dt>
+            <dd><a class="text-primary" [routerLink]="['/admin/ponentes', registro.ponenteId]">{{ nombrePonente() }}</a></dd>
+          </div>
+          <div>
+            <dt>Fecha y horario (Lima)</dt>
+            <dd class="horario-evento">{{ horario(registro.inicio, registro.fin, true) }}</dd>
+          </div>
+          <div>
+            <dt>{{ registro.lugar && registro.enlace ? 'Lugar y enlace' : registro.lugar ? 'Lugar' : 'Enlace' }}</dt>
+            <dd>
+              @if (registro.lugar) {
+                <span>{{ registro.lugar }}</span>
+              }
+              @if (registro.enlace) {
+                <a [href]="registro.enlace" target="_blank" rel="noopener noreferrer">{{ registro.enlace }}<span class="visually-hidden"> (abre en otra pestaña)</span></a>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Ocupación y cupos</dt>
+            <dd><span class="conteo-evento">{{ registro.inscripcionesConfirmadas }} confirmadas / {{ registro.cupo }} ({{ registro.cuposDisponibles }} disp.)</span></dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="seccion-inscritos d-grid gap-3" aria-labelledby="titulo-inscritos">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+        <h2 id="titulo-inscritos" class="titulo-inscritos">Lista de participantes inscritos</h2>
+        @if (puedeInscribir(registro)) {
+          <a class="btn btn-principal boton-eventos d-inline-flex align-items-center justify-content-center gap-2" routerLink="/admin/inscripciones/nueva">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14H8a4 4 0 0 0-4 4v2m13-1 3 3"/><circle cx="10" cy="7" r="4"/><circle cx="16.5" cy="16.5" r="3.5"/></svg>
+            Seleccionar usuario
+          </a>
+        } @else {
+          <span class="subtitulo-pagina">{{ registro.cuposDisponibles === 0 ? 'Sin cupos para nuevas inscripciones.' : 'El evento ya comenzó.' }}</span>
+        }
+      </div>
+
+      @if (inscripciones().length) {
+        <app-tabla-inscritos-evento [inscripciones]="inscripciones()"></app-tabla-inscritos-evento>
+      } @else {
+        <p class="card mensaje-eventos" role="status">Aún no hay inscripciones para este evento.</p>
+      }
+    </section>
+  }
+</div>

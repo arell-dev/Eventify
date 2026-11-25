@@ -1,0 +1,29 @@
+<div class="tabla-eventos table-responsive" role="region" aria-labelledby="titulo-tabla-inscritos" tabindex="0">
+  <table class="table table-hover align-middle mb-0">
+    <caption id="titulo-tabla-inscritos" class="visually-hidden">Inscripciones del evento</caption>
+    <thead>
+      <tr>
+        <th scope="col">Usuario</th>
+        <th scope="col">Correo</th>
+        <th scope="col">Carrera</th>
+        <th scope="col">Fecha de registro</th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (inscripcion of inscripciones(); track inscripcion.id) {
+        <tr>
+          <th scope="row">
+            <a [routerLink]="['/admin/inscripciones', inscripcion.id]">{{ inscripcion.participanteNombre }}</a>
+          </th>
+          <td>{{ inscripcion.participanteCorreo }}</td>
+          <td>{{ inscripcion.participanteCarrera || '—' }}</td>
+          <td class="fecha-inscripcion">{{ fecha(inscripcion.fechaRegistro) }}</td>
+          <td>
+            <span class="badge estado-inscripcion" [class.estado-confirmada]="inscripcion.estado === 'CONFIRMADA'" [class.estado-cancelada]="inscripcion.estado === 'CANCELADA'">{{ inscripcion.estado === 'CONFIRMADA' ? 'Confirmada' : 'Cancelada' }}</span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

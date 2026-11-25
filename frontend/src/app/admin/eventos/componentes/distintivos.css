@@ -1,0 +1,28 @@
+.distintivo-modalidad {
+  background: #d0f8ff;
+  color: #00363d;
+}
+
+.modalidad-virtual {
+  background: var(--color-cancelada-suave);
+  color: var(--color-texto-secundario);
+}
+
+.modalidad-hibrida {
+  background: var(--color-advertencia-suave);
+  color: var(--color-advertencia);
+}
+
+.badge:is(.distintivo-modalidad, .distintivo-estado, .distintivo-agotado) {
+  padding: 0.125rem 0.625rem;
+  border-radius: 50rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 0.875rem;
+  letter-spacing: 0.01875rem;
+}
+
+.distintivo-agotado {
+  background: var(--color-error-suave);
+  color: var(--color-error);
+}
