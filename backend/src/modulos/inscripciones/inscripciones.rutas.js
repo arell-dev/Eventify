@@ -1,6 +1,7 @@
 const express = require("express");
 const { almacen: almacenCompartido } = require("../../comun/almacen");
 const { requiereAdministrador } = require("../../comun/acceso-administrativo");
+const { contarConfirmadas, obtenerCuposDisponibles, representarInscripcion, verificarDisponibilidad, confirmarInscripcion } = require("./inscripciones.datos");
 
 // Conserva el estado HTTP esperado junto al mensaje de validación o negocio.
 class ErrorHttp extends Error {
@@ -69,18 +70,6 @@ const obtenerParticipante = (datos, participanteId) => {
   return participante;
 };
 
-// Solo las inscripciones confirmadas consumen cupos del evento.
-const contarConfirmadas = (datos, eventoId) => {
-  return datos.inscripciones.filter((inscripcion) => {
-    return inscripcion.eventoId === eventoId && inscripcion.estado === "CONFIRMADA";
-  }).length;
-};
-
-// Calcula la disponibilidad con las inscripciones actuales del mismo evento.
-const obtenerCuposDisponibles = (datos, evento) => {
-  return evento.cupo - contarConfirmadas(datos, evento.id);
-};
-
 // Impide cambios que dependen de disponibilidad cuando el evento ya comenzó.
 const esEventoFuturo = (evento) => {
   const inicio = new Date(evento.inicio).getTime();
@@ -90,31 +79,11 @@ const esEventoFuturo = (evento) => {
 
 // Centraliza las reglas para crear o reactivar una inscripción.
 const comprobarDisponibilidad = (datos, evento) => {
-  if (!esEventoFuturo(evento)) {
-    throw new ErrorHttp(409, "Solo puedes inscribir participantes en eventos que todavía no han comenzado.");
+  const mensaje = verificarDisponibilidad(datos, evento);
+
+  if (mensaje) {
+    throw new ErrorHttp(409, mensaje);
   }
-
-  if (obtenerCuposDisponibles(datos, evento) <= 0) {
-    throw new ErrorHttp(409, "El evento ya no tiene cupos disponibles.");
-  }
-};
-
-// Agrega nombres y cupos actuales para que la interfaz no una datos por separado.
-const representarInscripcion = (datos, inscripcion) => {
-  const evento = datos.eventos.find((elemento) => elemento.id === inscripcion.eventoId);
-  const participante = datos.participantes.find((elemento) => elemento.id === inscripcion.participanteId);
-
-  return {
-    ...inscripcion,
-    eventoTitulo: evento?.titulo || "Evento no disponible",
-    eventoInicio: evento?.inicio || null,
-    eventoFin: evento?.fin || null,
-    cupoEvento: evento?.cupo ?? null,
-    inscripcionesConfirmadas: evento ? contarConfirmadas(datos, evento.id) : null,
-    cuposDisponibles: evento ? obtenerCuposDisponibles(datos, evento) : null,
-    participanteNombre: participante?.nombre || "Participante no disponible",
-    participanteCorreo: participante?.correo || ""
-  };
 };
 
 // Permite sustituir el almacén en pruebas y protege las rutas con sesión.
@@ -182,39 +151,13 @@ const crearRouter = (opciones = {}) => {
       const resultado = await almacen.transaccion((datos) => {
         const evento = obtenerEvento(datos, eventoId);
         obtenerParticipante(datos, participanteId);
-        const existente = datos.inscripciones.find((inscripcion) => {
-          return inscripcion.eventoId === eventoId && inscripcion.participanteId === participanteId;
-        });
+        const resultado = confirmarInscripcion(datos, evento, participanteId);
 
-        if (existente && existente.estado === "CONFIRMADA") {
-          throw new ErrorHttp(409, "El participante ya tiene una inscripción confirmada en este evento.");
+        if (resultado.mensaje) {
+          throw new ErrorHttp(409, resultado.mensaje);
         }
 
-        comprobarDisponibilidad(datos, evento);
-
-        if (existente) {
-          existente.estado = "CONFIRMADA";
-
-          return {
-            inscripcion: existente,
-            reactivada: true
-          };
-        }
-
-        const nuevaInscripcion = {
-          id: datos.siguientesIds.inscripciones++,
-          eventoId,
-          participanteId,
-          estado: "CONFIRMADA",
-          fechaRegistro: new Date().toISOString()
-        };
-
-        datos.inscripciones.push(nuevaInscripcion);
-
-        return {
-          inscripcion: nuevaInscripcion,
-          reactivada: false
-        };
+        return resultado;
       });
       const datosActualizados = await almacen.leer();
       const estadoRespuesta = resultado.reactivada ? 200 : 201;

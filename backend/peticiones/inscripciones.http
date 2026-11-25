@@ -1,0 +1,104 @@
+@base = http://localhost:3000/api
+@origen = http://localhost:4200
+
+### Iniciar sesión administrativa
+# @name inicioAdmin
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "C25170@utp.edu.pe",
+  "contrasena": "@Linux22"
+}
+
+### Consultar inscripciones
+GET {{base}}/inscripciones
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Crear un evento futuro para este recorrido
+# @name crearEvento
+POST {{base}}/eventos
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "titulo": "Evento de inscripciones",
+  "descripcion": "Actividad académica de ejemplo.",
+  "tipo": "TALLER",
+  "modalidad": "VIRTUAL",
+  "lugar": "",
+  "enlace": "https://example.com/inscripciones",
+  "inicio": "2035-02-10T15:00:00.000Z",
+  "fin": "2035-02-10T17:00:00.000Z",
+  "cupo": 2,
+  "ponenteId": 1
+}
+
+### Inscribir el participante 1 en el evento creado
+# @name crearInscripcion
+POST {{base}}/inscripciones
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "eventoId": {{crearEvento.response.body.$.id}},
+  "participanteId": 1
+}
+
+### Consultar la inscripción creada
+GET {{base}}/inscripciones/{{crearInscripcion.response.body.$.id}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Cancelar la inscripción
+PATCH {{base}}/inscripciones/{{crearInscripcion.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "estado": "CANCELADA"
+}
+
+### Reactivar la inscripción si hay cupo
+PATCH {{base}}/inscripciones/{{crearInscripcion.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "estado": "CONFIRMADA"
+}
+
+### Cancelar antes de eliminar
+PATCH {{base}}/inscripciones/{{crearInscripcion.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "estado": "CANCELADA"
+}
+
+### Eliminar la inscripción cancelada
+DELETE {{base}}/inscripciones/{{crearInscripcion.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Eliminar el evento de este recorrido
+DELETE {{base}}/eventos/{{crearEvento.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Participante inexistente: respuesta esperada 404
+POST {{base}}/inscripciones
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "eventoId": 1,
+  "participanteId": 999999
+}
