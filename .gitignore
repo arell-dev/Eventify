@@ -8,3 +8,5 @@ coverage/
 npm-debug.log*
 /backend/datos/eventify.json
 /backend/datos/*.tmp
+/backend/src/datos/eventify.json
+/backend/src/datos/*.tmp

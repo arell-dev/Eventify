@@ -1,0 +1,64 @@
+[
+  {
+    "id": 1,
+    "nombre": "Anthony Paul Tavara Ramos",
+    "correo": "C25170@utp.edu.pe",
+    "carrera": "",
+    "especialidad": "",
+    "rol": "ADMIN",
+    "contrasena": "@Linux22"
+  },
+  {
+    "id": 2,
+    "nombre": "María López",
+    "correo": "maria.lopez@utp.edu.pe",
+    "carrera": "Ingeniería de Sistemas",
+    "especialidad": "",
+    "rol": "USUARIO",
+    "contrasena": "Eventify2026!"
+  },
+  {
+    "id": 3,
+    "nombre": "Carlos Torres",
+    "correo": "carlos.torres@utp.edu.pe",
+    "carrera": "Ingeniería Industrial",
+    "especialidad": "",
+    "rol": "USUARIO",
+    "contrasena": "Eventify2026!"
+  },
+  {
+    "id": 4,
+    "nombre": "Lucía Ramírez",
+    "correo": "lucia.ramirez@utp.edu.pe",
+    "carrera": "Administración de Empresas",
+    "especialidad": "",
+    "rol": "USUARIO",
+    "contrasena": "Eventify2026!"
+  },
+  {
+    "id": 5,
+    "nombre": "Andrea Salazar",
+    "correo": "andrea.salazar@utp.edu.pe",
+    "carrera": "",
+    "especialidad": "Desarrollo web",
+    "rol": "USUARIO",
+    "contrasena": "Eventify2026!"
+  },
+  {
+    "id": 6,
+    "nombre": "Diego Mendoza",
+    "correo": "diego.mendoza@utp.edu.pe",
+    "carrera": "",
+    "especialidad": "Inteligencia artificial",
+    "rol": "USUARIO",
+    "contrasena": "Eventify2026!"
+  },
+  {
+    "id": 7,
+    "nombre": "Valeria Soto",
+    "correo": "valeria.soto@utp.edu.pe",
+    "carrera": "",
+    "especialidad": "Ciberseguridad",
+    "rol": "USUARIO"
+  }
+]

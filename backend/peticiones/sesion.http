@@ -1,0 +1,35 @@
+@base = http://localhost:3000/api
+@origen = http://localhost:4200
+
+### Consultar el estado de la API
+GET {{base}}/estado
+
+### Iniciar sesión administrativa con la cuenta de demostración
+# @name inicioAdmin
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "C25170@utp.edu.pe",
+  "contrasena": "@Linux22"
+}
+
+### Consultar la sesión administrativa
+GET {{base}}/sesion
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Cerrar la sesión administrativa
+DELETE {{base}}/sesion
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Comprobar credenciales incorrectas: respuesta esperada 401
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "C25170@utp.edu.pe",
+  "contrasena": "incorrecta"
+}

@@ -1,0 +1,124 @@
+@base = http://localhost:3000/api
+@origen = http://localhost:4200
+@ponenteConEventos = 1
+@participanteConInscripciones = 1
+
+### Iniciar sesión administrativa
+# @name inicioAdmin
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "C25170@utp.edu.pe",
+  "contrasena": "@Linux22"
+}
+
+### Consultar las cuentas registradas
+GET {{base}}/usuarios
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Consultar cuentas disponibles para cada perfil
+GET {{base}}/usuarios?rol=ponente
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Cuentas disponibles para participantes
+GET {{base}}/usuarios?rol=participante
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Consultar el mismo padrón desde el selector de Participantes
+GET {{base}}/participantes/usuarios-disponibles
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Crear una cuenta de ejemplo; cambia el correo antes de repetir
+# @name crearUsuario
+POST {{base}}/usuarios
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "nombre": "Usuario de ejemplo",
+  "correo": "ejemplo@eventify.test",
+  "carrera": "Sistemas",
+  "especialidad": "Desarrollo web",
+  "contrasena": "ejemplo2026"
+}
+
+### Registrar la cuenta creada como ponente
+# @name crearPonente
+POST {{base}}/ponentes
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{crearUsuario.response.body.$.id}}
+}
+
+### Registrar la misma cuenta como participante
+# @name crearParticipante
+POST {{base}}/participantes
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "usuarioId": {{crearUsuario.response.body.$.id}}
+}
+
+### Consultar los perfiles registrados
+GET {{base}}/ponentes
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Consultar participantes
+GET {{base}}/participantes
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Consultar la ficha de un ponente
+GET {{base}}/ponentes/{{crearPonente.response.body.$.id}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Consultar la agenda y los cupos de sus eventos
+GET {{base}}/ponentes/{{ponenteConEventos}}/eventos
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Editar el ponente de ejemplo
+PUT {{base}}/ponentes/{{crearPonente.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "nombre": "Usuario de ejemplo",
+  "correo": "{{crearUsuario.response.body.$.correo}}",
+  "especialidad": "Arquitectura web"
+}
+
+### Consultar la ficha de un participante
+GET {{base}}/participantes/{{crearParticipante.response.body.$.id}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Consultar su historial con los títulos de los eventos
+GET {{base}}/participantes/{{participanteConInscripciones}}/inscripciones
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Baja bloqueada de un ponente con eventos (409)
+DELETE {{base}}/ponentes/{{ponenteConEventos}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Baja bloqueada de un participante con inscripciones, incluso canceladas (409)
+DELETE {{base}}/participantes/{{participanteConInscripciones}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Eliminar el perfil de ponente de ejemplo sin eventos
+DELETE {{base}}/ponentes/{{crearPonente.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}
+
+### Eliminar el perfil de participante de ejemplo sin inscripciones
+DELETE {{base}}/participantes/{{crearParticipante.response.body.$.id}}
+Origin: {{origen}}
+Cookie: {{inicioAdmin.response.headers.Set-Cookie}}

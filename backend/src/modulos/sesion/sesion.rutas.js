@@ -1,4 +1,5 @@
 const express = require("express");
+const { comprobarContrasena, normalizarCorreo } = require("../../comun/usuarios");
 
 const ORIGEN_AUTORIZADO = "http://localhost:4200";
 const VENTANA_INTENTOS_MS = 15 * 60 * 1000;
@@ -7,8 +8,7 @@ const MAX_INTENTOS_FALLIDOS = 5;
 // Limita los intentos fallidos de acceso por dirección de origen.
 const crearRouter = (opciones = {}) => {
   const router = express.Router();
-  const usuarioAdmin = opciones.usuarioAdmin ?? process.env.ADMIN_USUARIO;
-  const contrasenaAdmin = opciones.contrasenaAdmin ?? process.env.ADMIN_CONTRASENA;
+  const almacen = opciones.almacen;
   const intentosPorOrigen = new Map();
 
   router.get("/", (solicitud, respuesta) => {
@@ -17,13 +17,16 @@ const crearRouter = (opciones = {}) => {
       return;
     }
 
-    respuesta.status(200).json({
-      usuario: solicitud.session.usuario,
-      rol: solicitud.session.rol
-    });
+    const sesion = { usuario: solicitud.session.usuario, rol: solicitud.session.rol };
+
+    if (solicitud.session.perfil) {
+      sesion.perfil = solicitud.session.perfil;
+    }
+
+    respuesta.status(200).json(sesion);
   });
 
-  router.post("/", (solicitud, respuesta, siguiente) => {
+  router.post("/", async (solicitud, respuesta, siguiente) => {
     if (solicitud.get("Origin") !== ORIGEN_AUTORIZADO) {
       respuesta.status(403).json({ mensaje: "El origen de la solicitud no está permitido." });
       return;
@@ -56,12 +59,17 @@ const crearRouter = (opciones = {}) => {
       return;
     }
 
-    if (!usuarioAdmin || !contrasenaAdmin) {
-      respuesta.status(503).json({ mensaje: "El acceso administrativo no está configurado." });
+    let usuario;
+
+    try {
+      const datos = await almacen.leer();
+      usuario = datos.usuarios.find((item) => normalizarCorreo(item.correo) === normalizarCorreo(cuerpo.usuario));
+    } catch (error) {
+      siguiente(error);
       return;
     }
 
-    if (cuerpo.usuario !== usuarioAdmin || cuerpo.contrasena !== contrasenaAdmin) {
+    if (!usuario || !comprobarContrasena(cuerpo.contrasena, usuario.contrasenaHash)) {
       const mismoPeriodo = registroIntentos && ahora - registroIntentos.inicio < VENTANA_INTENTOS_MS;
       intentosPorOrigen.set(origen, {
         inicio: mismoPeriodo ? registroIntentos.inicio : ahora,
@@ -71,6 +79,11 @@ const crearRouter = (opciones = {}) => {
       return;
     }
 
+    const perfil = usuario.rol === "USUARIO" ? {
+      id: usuario.id, nombre: usuario.nombre, correo: usuario.correo, carrera: usuario.carrera || ""
+    } : undefined;
+    const correoSesion = usuario.correo;
+    const rol = usuario.rol;
     intentosPorOrigen.delete(origen);
     solicitud.session.regenerate((error) => {
       if (error) {
@@ -78,15 +91,21 @@ const crearRouter = (opciones = {}) => {
         return;
       }
 
-      solicitud.session.usuario = usuarioAdmin;
-      solicitud.session.rol = "ADMIN";
+      solicitud.session.usuario = correoSesion;
+      solicitud.session.rol = rol;
+      solicitud.session.perfil = perfil;
+      
       solicitud.session.save((errorGuardado) => {
         if (errorGuardado) {
           siguiente(errorGuardado);
           return;
         }
 
-        respuesta.status(200).json({ usuario: usuarioAdmin, rol: "ADMIN" });
+        const sesion = { usuario: correoSesion, rol };
+        if (perfil) {
+          sesion.perfil = perfil;
+        }
+        respuesta.status(200).json(sesion);
       });
     });
   });

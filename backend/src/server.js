@@ -1,16 +1,14 @@
 const app = require("./app");
+const { almacen } = require("./comun/almacen");
 
 const puerto = 3000;
-const variablesRequeridas = ["ADMIN_USUARIO", "ADMIN_CONTRASENA", "SESSION_SECRET"];
-const variablesFaltantes = variablesRequeridas.filter((nombre) => {
-  return !process.env[nombre] || process.env[nombre].trim().length === 0;
-});
 
-if (variablesFaltantes.length > 0) {
-  console.error(`Faltan variables requeridas: ${variablesFaltantes.join(", ")}.`);
-  process.exitCode = 1;
-} else {
+// El almacén inicializa las cuentas locales antes de atender solicitudes.
+almacen.leer().then(() => {
   app.listen(puerto, () => {
     console.log(`API disponible en http://localhost:${puerto}`);
   });
-}
+}).catch((error) => {
+  console.error(`No se pudo preparar el almacén: ${error.message}`);
+  process.exitCode = 1;
+});
