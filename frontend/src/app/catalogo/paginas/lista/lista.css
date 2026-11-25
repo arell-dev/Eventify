@@ -1,0 +1,106 @@
+.presentacion h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 2.125rem;
+  letter-spacing: -0.25px;
+  text-wrap: balance;
+}
+
+.presentacion p {
+  max-width: 65ch;
+  text-wrap: pretty;
+}
+
+.filtros-catalogo {
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+.etiqueta-control {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.filtros-catalogo :is(.form-control, .form-select) {
+  min-height: 2.625rem;
+  padding-block: 0.625rem;
+  border-radius: 0.5rem;
+  font-size: inherit;
+  line-height: 1.25rem;
+}
+
+.campo-busqueda {
+  padding-inline-start: 2.5rem;
+}
+
+.campo-busqueda::placeholder {
+  color: var(--color-texto-inactivo);
+}
+
+.icono-busqueda {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  inset-inline-start: 0.875rem;
+  color: var(--color-texto-secundario);
+  font-size: 1.125rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.tarjetas-catalogo {
+  margin-top: calc(-1 * var(--bs-gutter-y));
+}
+
+.titulo-tarjeta {
+  font: 600 1.125rem / 1.5rem var(--bs-body-font-family);
+}
+
+.resumen-tarjeta {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.resumen-tarjeta app-icono-catalogo {
+  font-size: 1rem;
+}
+
+.numero-cupos,
+.boton-tarjeta {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.boton-tarjeta {
+  min-height: 0;
+  border-radius: 0.5rem;
+  font-weight: 600;
+}
+
+.boton-tarjeta.btn-secundario {
+  color: var(--color-texto);
+}
+
+.boton-tarjeta.btn-secundario:hover {
+  border-color: var(--color-borde);
+  background-color: var(--color-superficie-suave);
+}
+
+@media (min-width: 1024px) {
+  .presentacion h1 {
+    font-size: 2.5rem;
+    line-height: 3rem;
+    letter-spacing: -0.5px;
+  }
+
+  .filtros-catalogo {
+    padding: 1.5rem;
+  }
+
+  .tarjetas-catalogo > .col {
+    width: calc(100% / 3);
+  }
+}

@@ -1,0 +1,189 @@
+<app-cabecera-publica [detalle]="true" [comprobandoSesion]="comprobandoSesion()"/>
+
+<main class="contenedor-catalogo">
+  @if (evento(); as registro) {
+    @if (errorEvento()) {
+      <div class="card panel-catalogo p-3 mb-4 align-items-start">
+        <p role="status">No se pudo actualizar la disponibilidad.</p>
+        <button class="btn btn-secundario" type="button" (click)="cargarEvento()">Reintentar</button>
+      </div>
+    }
+
+    <div class="row fila-detalle align-items-start">
+      <div class="col-12 columna-evento">
+        <section class="card panel-catalogo panel-detalle d-flex flex-column gap-4" aria-labelledby="titulo-evento">
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge insignia-catalogo" [attr.data-modalidad]="registro.modalidad">{{ nombresModalidad[registro.modalidad] }}</span>
+
+            @if (estado(); as estadoActual) {
+              <span class="badge insignia-catalogo" [attr.data-estado]="estadoActual">{{ nombresEstado[estadoActual] }}</span>
+            }
+
+            <span class="badge insignia-catalogo">{{ registro.tipo }}</span>
+          </div>
+
+          <div class="d-flex flex-column gap-2">
+            <h1 id="titulo-evento" class="titulo-evento mb-0">{{ registro.titulo }}</h1>
+            <p class="descripcion-evento texto-secundario mb-0">{{ registro.descripcion }}</p>
+          </div>
+
+          <section class="border-top pt-3" aria-label="Datos del evento">
+            <dl class="row g-3 mb-0">
+              <div class="col-12 col-sm-6">
+                <div class="dato-evento d-flex align-items-start gap-2 h-100 p-3">
+                  <span class="icono-dato"><app-icono-catalogo nombre="ponente"/></span>
+                  <div>
+                    <dt>Ponente</dt>
+                    <dd>{{ registro.nombrePonente }}</dd>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-sm-6">
+                <div class="dato-evento d-flex align-items-start gap-2 h-100 p-3">
+                  <span class="icono-dato"><app-icono-catalogo nombre="hora"/></span>
+                  <div>
+                    <dt>Inicio y fin</dt>
+                    <dd class="dato-monospaciado">
+                      <time class="d-block" [attr.datetime]="registro.inicio">{{ fechaDia(registro.inicio) }}</time>
+                      {{ horarioEvento(registro.inicio, registro.fin) }}
+                    </dd>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="dato-evento d-flex align-items-start gap-2 p-3">
+                  <span class="icono-dato"><app-icono-catalogo [nombre]="registro.modalidad === 'VIRTUAL' ? 'video' : 'lugar'"/></span>
+
+                  <div>
+                    @if (registro.lugar) {
+                      <dt>Ubicación presencial</dt>
+                      <dd>{{ registro.lugar }}</dd>
+                    }
+
+                    @if (registro.modalidad !== 'PRESENCIAL') {
+                      <dt [class.mt-2]="registro.lugar">Acceso virtual</dt>
+                      <dd>
+                        @if (enlaceVirtual(); as enlace) {
+                          <a [href]="enlace.href" target="_blank" rel="noopener noreferrer">{{ plataformaVirtual() || 'Abrir enlace del evento' }}<span class="visually-hidden"> (abre en otra pestaña)</span></a>
+                        } @else {
+                          Enlace virtual no disponible
+                        }
+                      </dd>
+                    }
+                  </div>
+                </div>
+              </div>
+            </dl>
+          </section>
+
+          <div class="dato-evento disponibilidad p-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+              <strong>Disponibilidad de cupos</strong>
+              <span class="numero-cupos dato-monospaciado" [class.cupos-agotados]="registro.cuposDisponibles === 0" role="status">{{ textoCupos(registro.cuposDisponibles) }} de {{ registro.cupo }}</span>
+            </div>
+
+            @let ocupados = registro.cupo - registro.cuposDisponibles;
+
+            <div class="progress barra-cupos" role="progressbar" aria-label="Cupos ocupados" aria-valuemin="0" [attr.aria-valuemax]="registro.cupo" [attr.aria-valuenow]="ocupados">
+              <div class="progress-bar rounded-pill" [style.width.%]="registro.cupo ? ocupados / registro.cupo * 100 : 0"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12 columna-inscripcion">
+        <aside class="card panel-catalogo panel-detalle d-flex flex-column gap-3" aria-labelledby="titulo-inscripcion">
+          <div class="d-flex flex-column gap-1">
+            <h2 id="titulo-inscripcion" class="titulo-inscripcion mb-0">Inscríbete con tu cuenta</h2>
+
+            @if (comprobandoSesion()) {
+              <p class="texto-secundario mb-0" role="status">Comprobando tu sesión…</p>
+            } @else if (!sesion() && estado() === 'PROXIMO') {
+              <p class="texto-secundario mb-0">Inicia sesión para reservar uno de los cupos disponibles.</p>
+            } @else if (sesion()?.rol === 'ADMIN') {
+              <p class="texto-secundario mb-0">La inscripción personal requiere una cuenta de usuario.</p>
+            } @else if (inscripcion()?.estado !== 'CONFIRMADA' && estado() === 'PROXIMO') {
+              <p class="texto-secundario mb-0">Confirma tus datos de usuario para reservar uno de los cupos disponibles.</p>
+            }
+          </div>
+
+          @if (!comprobandoSesion()) {
+            @if (!sesion() && estado() === 'PROXIMO') {
+              <a class="btn btn-principal boton-publico-primario py-2" routerLink="/acceso" [queryParams]="{ retorno: '/eventos/' + registro.id }">Iniciar sesión</a>
+            } @else if (sesion()?.rol === 'USUARIO') {
+              @if (sesion()?.perfil; as perfil) {
+                <div class="dato-evento disponibilidad d-flex flex-column gap-2 p-3">
+                  <small class="texto-secundario">Usuario autenticado</small>
+                  <div class="d-flex flex-column gap-1">
+                    <strong>{{ perfil.nombre }}</strong>
+                    <span class="dato-monospaciado texto-secundario">{{ perfil.correo }}</span>
+                    @if (perfil.carrera) {
+                      <small class="texto-secundario">{{ perfil.carrera }}</small>
+                    }
+                  </div>
+                </div>
+              }
+
+              @switch (consultaInscripcion()) {
+                @case ('cargando') {
+                  <p class="texto-secundario mb-0" role="status">Consultando tu inscripción…</p>
+                }
+
+                @case ('error') {
+                  <p class="texto-secundario mb-0" role="status">No se pudo consultar tu inscripción.</p>
+                  <button class="btn btn-secundario" type="button" (click)="cargarInscripcion()">Reintentar</button>
+                }
+
+                @case ('lista') {
+                  @if (inscripcion()?.estado === 'CONFIRMADA') {
+                    <p class="estado-confirmada rounded-3 px-3 py-2 mb-0 fw-semibold" role="status">Inscripción confirmada</p>
+                  } @else if (estado() === 'PROXIMO') {
+                    <form class="d-flex flex-column gap-3" [formGroup]="formulario" (ngSubmit)="confirmarInscripcion()">
+                      @if (inscripcion()?.estado === 'CANCELADA') {
+                        <p class="texto-secundario mb-0">Tu inscripción anterior fue cancelada. Puedes reactivarla si hay cupos.</p>
+                      }
+
+                      <div class="d-flex align-items-start gap-2">
+                        <input id="confirmacion-reserva" class="form-check-input casilla-confirmacion flex-shrink-0" type="checkbox" required formControlName="confirmacion" [attr.aria-invalid]="confirmacion.dirty && confirmacion.invalid" [attr.aria-describedby]="confirmacion.dirty && confirmacion.invalid ? 'error-confirmacion' : null">
+                        <label class="texto-confirmacion texto-secundario" for="confirmacion-reserva">Confirmo que mis datos de usuario son correctos y deseo reservar una vacante en este evento.</label>
+                      </div>
+
+                      @if (confirmacion.dirty && confirmacion.invalid) {
+                        <p id="error-confirmacion" class="texto-error mb-0" role="status">Marca la casilla para confirmar tu inscripción.</p>
+                      }
+
+                      <button class="btn btn-principal boton-publico-primario boton-confirmacion" type="submit" [disabled]="confirmacion.invalid || procesando() || cargandoEvento() || !!errorEvento()">
+                        {{ procesando() ? 'Registrando…' : 'Confirmar mi inscripción' }}
+                      </button>
+                    </form>
+                  }
+                }
+              }
+            }
+
+            @if (estado() !== 'PROXIMO' && inscripcion()?.estado !== 'CONFIRMADA') {
+              <p class="texto-secundario mb-0">
+                {{ estado() === 'AGOTADO' ? 'Este evento ya no tiene cupos disponibles.' : 'Las inscripciones para este evento están cerradas.' }}
+              </p>
+            }
+          }
+        </aside>
+      </div>
+    </div>
+  } @else if (cargandoEvento()) {
+    <p class="texto-secundario mb-0" role="status">Cargando evento…</p>
+  } @else if (errorEvento() === 'no-encontrado') {
+    <section class="card panel-catalogo p-4 align-items-start">
+      <h1 class="titulo-evento">Evento no encontrado</h1>
+      <p class="texto-secundario">El evento solicitado no está disponible.</p>
+      <a class="btn btn-secundario" routerLink="/eventos">Explorar eventos</a>
+    </section>
+  } @else {
+    <div class="card panel-catalogo p-4 align-items-start">
+      <p role="status">No se pudo cargar el evento.</p>
+      <button class="btn btn-secundario" type="button" (click)="cargarEvento()">Reintentar</button>
+    </div>
+  }
+</main>

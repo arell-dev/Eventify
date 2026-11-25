@@ -4,7 +4,13 @@ import { Observable, catchError, map, of, tap } from 'rxjs';
 
 export interface SesionAdministrativa {
   usuario: string;
-  rol: 'ADMIN';
+  rol: 'ADMIN' | 'USUARIO';
+  perfil?: {
+    id: number;
+    nombre: string;
+    correo: string;
+    carrera?: string;
+  };
 }
 
 interface CredencialesAdministrativas {

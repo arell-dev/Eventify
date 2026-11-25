@@ -1,0 +1,171 @@
+.contenedor-publico {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.logo-utp {
+  width: auto;
+  height: 2rem;
+}
+
+.marca-publica {
+  font-size: 1rem;
+  line-height: 1.375;
+}
+
+.marca-publica strong {
+  font-weight: 600;
+}
+
+.marca-publica small,
+.enlace-volver {
+  color: var(--color-texto-secundario);
+}
+
+.marca-publica small {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.enlace-volver {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.enlace-volver:hover {
+  color: var(--color-principal);
+}
+
+.boton-acceso {
+  color: var(--color-texto);
+  font-size: 0.75rem;
+}
+
+.boton-acceso app-icono-catalogo,
+.enlace-volver app-icono-catalogo {
+  font-size: 1.125rem;
+}
+
+.boton-acceso {
+  min-height: 0;
+  border-radius: 0.5rem;
+}
+
+.boton-acceso:hover {
+  border-color: var(--color-borde);
+  background-color: var(--color-superficie-suave);
+  color: var(--color-texto);
+}
+
+.cuenta-publica {
+  min-width: 0;
+  max-width: 14rem;
+}
+
+.activador-cuenta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.625rem 0.25rem 0.25rem;
+  border: 1px solid var(--color-borde);
+  border-radius: 0.75rem;
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  list-style: none;
+}
+
+.activador-cuenta::-webkit-details-marker {
+  display: none;
+}
+
+.activador-cuenta:hover,
+.cuenta-publica[open] .activador-cuenta {
+  border-color: var(--color-principal);
+  background-color: var(--color-superficie-suave);
+}
+
+.activador-cuenta:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 3px;
+}
+
+.iniciales-cuenta {
+  display: grid;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background-color: var(--color-acento-suave);
+  color: var(--color-principal);
+  font-size: 0.6875rem;
+}
+
+.nombre-cuenta {
+  min-width: 0;
+}
+
+.indicador-cuenta {
+  color: var(--color-texto-secundario);
+}
+
+.cuenta-publica[open] .indicador-cuenta {
+  transform: rotate(180deg);
+}
+
+.opciones-cuenta {
+  z-index: 2;
+  width: min(12rem, calc(100vw - 2rem));
+  padding: 0.25rem;
+  box-shadow: 0 0.5rem 1.25rem rgb(31 27 28 / 12%);
+}
+
+.opciones-cuenta .dropdown-item {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.625rem;
+  color: var(--color-texto);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.opciones-cuenta .dropdown-item + .dropdown-item {
+  margin-top: 0.125rem;
+}
+
+.opciones-cuenta .dropdown-item:is(:hover, :focus-visible, :active) {
+  background-color: var(--color-superficie-suave);
+}
+
+.opciones-cuenta .salida-cuenta {
+  color: var(--color-principal);
+}
+
+.opciones-cuenta .salida-cuenta:disabled {
+  color: var(--color-texto-inactivo);
+}
+
+.opciones-cuenta app-icono-catalogo {
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .indicador-cuenta {
+    transition: transform 120ms ease-out;
+  }
+}
+
+@media (min-width: 1024px) {
+  .contenedor-publico {
+    padding-inline: 1.5rem;
+  }
+
+  .logo-utp {
+    height: 2.25rem;
+  }
+}

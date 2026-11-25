@@ -6,7 +6,24 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'admin/acceso'
+    redirectTo: 'eventos'
+  },
+  {
+    path: 'eventos',
+    title: 'Catálogo | Eventos UTP',
+    loadComponent: () => import('./catalogo/paginas/lista/lista.component')
+      .then((modulo) => modulo.CatalogoListaComponent)
+  },
+  {
+    path: 'eventos/:id',
+    title: 'Detalle del evento | Eventos UTP',
+    loadComponent: () => import('./catalogo/paginas/detalle/detalle.component')
+      .then((modulo) => modulo.CatalogoDetalleComponent)
+  },
+  {
+    path: 'acceso',
+    title: 'Iniciar sesión | Eventos UTP',
+    loadComponent: () => import('./admin/acceso/acceso.component').then((modulo) => modulo.AccesoAdministrativoComponent)
   },
   {
     path: 'admin/acceso',
@@ -127,5 +144,6 @@ export const routes: Routes = [
         ]
       }
     ]
-  }
+  },
+  { path: '**', redirectTo: 'eventos' }
 ];

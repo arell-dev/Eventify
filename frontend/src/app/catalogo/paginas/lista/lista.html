@@ -1,0 +1,100 @@
+<app-cabecera-publica [comprobandoSesion]="comprobandoSesion()"/>
+
+<main class="contenedor-catalogo d-flex flex-column">
+  <section class="presentacion d-flex flex-column gap-1">
+    <h1 class="mb-0">Explora eventos universitarios e inscríbete</h1>
+    <p class="mb-0 texto-secundario">Consulta conferencias, talleres y seminarios de la comunidad UTP. Verifica la modalidad, los cupos disponibles y confirma tu inscripción con tu cuenta de usuario.</p>
+  </section>
+
+  <section class="card panel-catalogo filtros-catalogo" aria-label="Filtros del catálogo">
+    <div class="row g-3 align-items-end" [formGroup]="filtros">
+      <div class="col-12 col-md-6">
+        <label class="etiqueta-control" for="busqueda-evento">Buscar evento</label>
+        <div class="position-relative">
+          <app-icono-catalogo class="icono-busqueda" nombre="buscar"/>
+          <input id="busqueda-evento" class="form-control campo-busqueda" type="search" formControlName="busqueda" placeholder="Buscar por título, tema o ponente...">
+        </div>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="etiqueta-control" for="modalidad-evento">Modalidad</label>
+        <select id="modalidad-evento" class="form-select" formControlName="modalidad">
+          <option value="">Todas</option>
+          <option value="PRESENCIAL">Presencial</option>
+          <option value="VIRTUAL">Virtual</option>
+          <option value="HIBRIDO">Híbrido</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="etiqueta-control" for="disponibilidad-evento">Disponibilidad</label>
+        <select id="disponibilidad-evento" class="form-select" formControlName="estado">
+          <option value="">Todos los estados</option>
+          <option value="PROXIMO">Próximos con cupos</option>
+          <option value="EN_CURSO">En curso</option>
+          <option value="AGOTADO">Agotados</option>
+          <option value="FINALIZADO">Finalizados</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  @switch (resultado().estado) {
+    @case ('cargando') {
+      <p class="mb-0 texto-secundario" role="status">Cargando eventos…</p>
+    }
+
+    @case ('error') {
+      <div class="card panel-catalogo p-4 align-items-start">
+        <p role="status">No se pudo cargar el catálogo.</p>
+        <button class="btn btn-secundario" type="button" (click)="cargar()">Reintentar</button>
+      </div>
+    }
+
+    @case ('listo') {
+      @if (!resultado().eventos.length) {
+        <p class="card panel-catalogo p-4 mb-0 texto-secundario" role="status">Todavía no hay eventos publicados.</p>
+      } @else if (!tarjetas().length) {
+        <p class="card panel-catalogo p-4 mb-0 texto-secundario" role="status">No hay eventos que coincidan con los filtros.</p>
+      } @else {
+        <section class="row row-cols-1 row-cols-md-2 g-4 tarjetas-catalogo" aria-label="Listado de eventos">
+          @for (tarjeta of tarjetas(); track tarjeta.evento.id) {
+            @let evento = tarjeta.evento;
+            @let admiteInscripcion = tarjeta.estado === 'PROXIMO';
+
+            <div class="col">
+              <article class="card panel-catalogo h-100 p-4 d-flex flex-column justify-content-between gap-3">
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <span class="badge insignia-catalogo" [attr.data-modalidad]="evento.modalidad">{{ nombresModalidad[evento.modalidad] }}</span>
+                    <span class="badge insignia-catalogo" [attr.data-estado]="tarjeta.estado">{{ nombresEstado[tarjeta.estado] }}</span>
+                  </div>
+
+                  <h2 class="titulo-tarjeta mb-0">{{ evento.titulo }}</h2>
+                  <p class="resumen-tarjeta texto-secundario mb-0">Ponente: {{ evento.nombrePonente }}</p>
+
+                  <div class="resumen-tarjeta texto-secundario d-flex flex-column gap-1 pt-1">
+                    <div class="d-flex align-items-start gap-1">
+                      <app-icono-catalogo nombre="hora"/>
+                      <time class="dato-monospaciado" [attr.datetime]="evento.inicio">{{ fechaDia(evento.inicio) }} · {{ horarioEvento(evento.inicio, evento.fin) }}</time>
+                    </div>
+
+                    <div class="d-flex align-items-start gap-1">
+                      <app-icono-catalogo [nombre]="evento.modalidad === 'VIRTUAL' ? 'video' : 'lugar'"/>
+                      <span>{{ ubicacionEvento(evento) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <footer class="d-flex align-items-center justify-content-between flex-wrap gap-2 border-top pt-3">
+                  <strong class="numero-cupos" [class.cupos-agotados]="evento.cuposDisponibles === 0">{{ textoCupos(evento.cuposDisponibles) }}</strong>
+                  <a class="btn boton-tarjeta px-3 py-2" [class.btn-principal]="admiteInscripcion" [class.boton-publico-primario]="admiteInscripcion" [class.btn-secundario]="!admiteInscripcion" [routerLink]="['/eventos', evento.id]">{{ admiteInscripcion ? 'Inscribirme' : 'Ver detalle' }}</a>
+                </footer>
+              </article>
+            </div>
+          }
+        </section>
+      }
+    }
+  }
+</main>

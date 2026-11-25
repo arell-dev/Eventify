@@ -1,0 +1,46 @@
+@base = http://localhost:3000/api
+@origen = http://localhost:4200
+
+### Consultar eventos sin iniciar sesión
+GET {{base}}/publico/eventos
+
+### Iniciar sesión con una cuenta de usuario
+# @name inicioUsuario
+POST {{base}}/sesion
+Origin: {{origen}}
+Content-Type: application/json
+
+{
+  "usuario": "maria.lopez@utp.edu.pe",
+  "contrasena": "Eventify2026!"
+}
+
+### Consultar la inscripción propia en el evento 1
+GET {{base}}/publico/eventos/1/mi-inscripcion
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+
+### Inscribirse en el evento 1 si aún es futuro y tiene cupo
+POST {{base}}/publico/eventos/1/mi-inscripcion
+Origin: {{origen}}
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{}
+
+### Consultar notificaciones de la cuenta
+GET {{base}}/notificaciones
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+
+### Marcar una notificación propia como leída; sustituye el ID
+PATCH {{base}}/notificaciones/1
+Origin: {{origen}}
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
+Content-Type: application/json
+
+{
+  "leida": true
+}
+
+### Intentar entrar a la administración con esta cuenta: respuesta esperada 403
+GET {{base}}/eventos
+Cookie: {{inicioUsuario.response.headers.Set-Cookie}}
