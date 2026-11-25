@@ -1,0 +1,10 @@
+<dialog #panel id="menu-administracion-movil" class="panel-movil" aria-label="Menú de administración" closedby="any" (cancel)="alSolicitarCierre($event)" (close)="alCerrar()" (click)="alPulsarFondo($event)">
+  <div class="interior-panel d-flex flex-column">
+    <button class="btn cerrar-panel p-0 rounded-2" type="button" aria-label="Cerrar menú de administración" autofocus (click)="cerrar()">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m14 18-6-6 6-6m-6 6h12"></path>
+      </svg>
+    </button>
+    <ng-content></ng-content>
+  </div>
+</dialog>

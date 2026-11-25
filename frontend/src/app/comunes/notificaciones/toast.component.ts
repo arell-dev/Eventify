@@ -22,12 +22,14 @@ export class Toast {
         return;
       }
 
-      if (this.avisos().length > 0 && !contenedor.matches(':popover-open')) {
+      const tieneAvisos = this.avisos().length > 0;
+      const abierto = contenedor.matches(':popover-open');
+
+      if (tieneAvisos && !abierto) {
         contenedor.showPopover();
-        return;
       }
 
-      if (contenedor.matches(':popover-open')) {
+      if (!tieneAvisos && abierto) {
         contenedor.hidePopover();
       }
     });
