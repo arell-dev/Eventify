@@ -1,0 +1,61 @@
+.tarjeta-indicador {
+  --bs-card-border-radius: var(--radio-tarjeta-inicio);
+}
+
+.titulo-indicador {
+  color: var(--color-texto-secundario);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+  letter-spacing: 0.25px;
+}
+
+.indicador-valor {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 2.375rem;
+  letter-spacing: -0.25px;
+  font-variant-numeric: tabular-nums;
+}
+
+.detalle-indicador {
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.1px;
+}
+
+.detalle-ocupacion,
+.icono-indicador[data-tono='exito'] {
+  color: var(--color-exito);
+}
+
+.icono-indicador {
+  width: 1em;
+  flex: none;
+  overflow: hidden;
+  color: var(--color-principal);
+  font: 400 1.25rem / 1 'Material Symbols Inicio';
+  white-space: nowrap;
+}
+
+.icono-indicador[data-tono='informacion'] {
+  color: var(--color-informacion-inicio);
+}
+
+.icono-indicador[data-tono='secundario'] {
+  color: var(--color-secundario-inicio);
+}
+
+@media (min-width: 640px) {
+  .indicadores-inicio > .col {
+    width: 50%;
+  }
+}
+
+@media (min-width: 1280px) {
+  .indicadores-inicio > .col {
+    width: 25%;
+  }
+}

@@ -1,0 +1,63 @@
+@font-face {
+  font-family: 'Material Symbols Inicio';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/material-symbols-inicio.woff2') format('woff2');
+}
+
+.pagina-inicio {
+  max-width: 76rem;
+  --radio-tarjeta-inicio: 0.75rem;
+  --color-informacion-inicio: #004a53;
+  --color-informacion-fondo-inicio: #d0f8ff;
+  --color-secundario-inicio: #9f3e44;
+}
+
+.cabecera-inicio {
+  flex-direction: column;
+}
+
+.titulo-inicio {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 2.375rem;
+  letter-spacing: -0.25px;
+}
+
+.resumen-inicio {
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.boton-crear {
+  flex: none;
+  padding: calc(0.625rem - var(--bs-btn-border-width)) calc(1.25rem - var(--bs-btn-border-width));
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  letter-spacing: 0.1px;
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--color-principal);
+  --bs-btn-border-color: var(--color-principal);
+  --bs-btn-hover-bg: var(--color-principal-hover);
+  --bs-btn-hover-border-color: var(--color-principal-hover);
+  --bs-btn-active-bg: var(--color-principal-hover);
+  --bs-btn-active-border-color: var(--color-principal-hover);
+}
+
+.icono-inicio {
+  width: 1em;
+  overflow: hidden;
+  font: 400 1.125rem / 1 'Material Symbols Inicio';
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .cabecera-inicio {
+    flex-direction: row;
+    align-items: end;
+  }
+}

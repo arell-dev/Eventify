@@ -1,0 +1,53 @@
+<section class="d-flex flex-column gap-3" aria-labelledby="titulo-proximos-eventos">
+  <header class="d-flex align-items-center justify-content-between gap-3">
+    <h2 id="titulo-proximos-eventos" class="titulo-seccion mb-0">Próximos eventos y ocupación</h2>
+    <a class="enlace-todos text-nowrap" routerLink="/admin/eventos">Ver todos</a>
+  </header>
+
+  @if (cargando()) {
+    <p class="card mensaje-proximos p-3 mb-0" role="status">Cargando próximos eventos…</p>
+  } @else if (noDisponibles()) {
+    <p class="card mensaje-proximos p-3 mb-0">Próximos eventos no disponibles.</p>
+  } @else if (!eventos().length) {
+    <p class="card mensaje-proximos p-3 mb-0" role="status">No hay próximos eventos.</p>
+  } @else {
+    <div class="card contenedor-proximos table-responsive" role="region" aria-labelledby="titulo-proximos-eventos" tabindex="0">
+      <table class="table table-hover tabla-proximos align-middle mb-0">
+        <thead>
+          <tr>
+            <th scope="col">Evento</th>
+            <th scope="col">Modalidad</th>
+            <th scope="col">Inicio (Piura)</th>
+            <th scope="col">Ocupación</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (evento of eventos(); track evento.id) {
+            <tr>
+              <th scope="row">
+                <a class="enlace-evento" [routerLink]="['/admin/eventos', evento.id]">{{ evento.titulo }}</a>
+              </th>
+              <td>
+                <span class="badge rounded-pill etiqueta-evento" [attr.data-modalidad]="evento.modalidad">{{ modalidades[evento.modalidad] }}</span>
+              </td>
+              <td>
+                <time class="dato-evento" [attr.datetime]="evento.inicio">{{ formatearInicio(evento.inicio) }}</time>
+              </td>
+              <td>
+                <span class="dato-evento">{{ evento.inscripcionesConfirmadas }} / {{ evento.cupo }} ({{ evento.cuposDisponibles }} disp.)</span>
+              </td>
+              <td>
+                @if (evento.cuposDisponibles === 0) {
+                  <span class="badge rounded-pill etiqueta-evento etiqueta-agotado">Agotado</span>
+                } @else {
+                  <span class="badge rounded-pill etiqueta-evento etiqueta-proximo">Próximo</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
