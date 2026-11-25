@@ -1,0 +1,24 @@
+.card {
+  border-radius: var(--radio-superficie-eventos);
+}
+
+.indicador {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.indicador-valor {
+  color: var(--color-texto);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador-disponible {
+  color: var(--color-exito);
+}

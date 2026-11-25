@@ -1,0 +1,45 @@
+.campo-filtro {
+  display: grid;
+  gap: 0.25rem;
+  min-inline-size: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.campo-filtro :is(.form-control, .form-select) {
+  min-block-size: 2.375rem;
+  border-color: var(--color-borde-campo-eventos);
+  background-color: var(--color-superficie);
+  font-size: 0.875rem;
+}
+
+.campo-filtro :is(.form-control, .form-select):focus {
+  border-color: var(--color-foco);
+}
+
+.busqueda-eventos {
+  position: relative;
+}
+
+.busqueda-eventos svg {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  transform: translateY(-50%);
+  color: var(--color-texto-inactivo);
+  pointer-events: none;
+}
+
+.busqueda-eventos .form-control {
+  padding-inline-start: 2.5rem;
+}
+
+@media (pointer: coarse) {
+  .campo-filtro :is(.form-control, .form-select) {
+    min-block-size: 3rem;
+    font-size: 1rem;
+  }
+}

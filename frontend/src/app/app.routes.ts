@@ -22,6 +22,11 @@ export const routes: Routes = [
       .then((modulo) => modulo.AdministracionComponent),
     children: [
       {
+        path: 'eventos',
+        loadChildren: () => import('./admin/eventos/eventos.routes')
+          .then((modulo) => modulo.rutasEventos)
+      },
+      {
         path: 'participantes',
         children: [
           {

@@ -1,0 +1,44 @@
+<div class="tabla-eventos table-responsive" role="region" aria-labelledby="titulo-tabla-eventos" tabindex="0">
+  <table class="table table-hover align-middle mb-0">
+    <caption id="titulo-tabla-eventos" class="visually-hidden">Eventos, horarios y cupos</caption>
+    <thead>
+      <tr>
+        <th scope="col">Título y tipo</th>
+        <th scope="col">Ponente</th>
+        <th scope="col">Modalidad</th>
+        <th scope="col">Horario</th>
+        <th scope="col">Cupos</th>
+        <th scope="col" class="text-end">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (evento of eventos(); track evento.id) {
+        <tr>
+          <th scope="row" class="titulo-evento">
+            <a [routerLink]="['/admin/eventos', evento.id]">{{ evento.titulo }}</a>
+            <span class="dato-tabla">{{ etiquetaTipo(evento.tipo) }}</span>
+          </th>
+          <td>{{ nombresPonentes().get(evento.ponenteId) ?? 'Ponente no disponible' }}</td>
+          <td>
+            <span class="badge distintivo-modalidad" [class.modalidad-virtual]="evento.modalidad === 'VIRTUAL'" [class.modalidad-hibrida]="evento.modalidad === 'HIBRIDO'">{{ modalidades[evento.modalidad] }}</span>
+          </td>
+          <td class="dato-mono">{{ horario(evento.inicio, evento.fin) }}</td>
+          <td class="dato-mono">
+            @if (evento.cuposDisponibles === 0) {
+              <span class="badge distintivo-agotado">Agotado</span>
+            } @else {
+              {{ evento.cuposDisponibles }} / {{ evento.cupo }} disp.
+            }
+          </td>
+          <td>
+            <div class="d-flex justify-content-end gap-1">
+              <a class="btn accion-evento" [routerLink]="['/admin/eventos', evento.id]" [attr.aria-label]="'Ver detalle de ' + evento.titulo" title="Ver detalle"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></a>
+              <a class="btn accion-evento" [routerLink]="['/admin/eventos', evento.id, 'editar']" [attr.aria-label]="'Editar ' + evento.titulo" title="Editar"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 6 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/></svg></a>
+              <button class="btn accion-evento accion-peligro" type="button" [attr.aria-disabled]="eliminando() || null" [attr.aria-label]="'Eliminar ' + evento.titulo" title="Eliminar" (click)="eliminar.emit(evento)"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></button>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

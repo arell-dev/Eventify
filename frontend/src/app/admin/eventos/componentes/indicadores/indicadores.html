@@ -1,0 +1,28 @@
+<section class="row row-cols-1 row-cols-sm-3 g-3" aria-label="Indicadores de eventos">
+  <div class="col">
+    <article class="card h-100">
+      <div class="card-body indicador">
+        <span>Próximos eventos</span>
+        <strong class="indicador-valor">{{ proximos() }}</strong>
+      </div>
+    </article>
+  </div>
+
+  <div class="col">
+    <article class="card h-100">
+      <div class="card-body indicador">
+        <span>Ocupación promedio</span>
+        <strong class="indicador-valor">{{ ocupacion() }}%</strong>
+      </div>
+    </article>
+  </div>
+
+  <div class="col">
+    <article class="card h-100">
+      <div class="card-body indicador">
+        <span>Cupos disponibles</span>
+        <strong class="indicador-valor indicador-disponible">{{ disponibles() }}</strong>
+      </div>
+    </article>
+  </div>
+</section>

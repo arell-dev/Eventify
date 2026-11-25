@@ -1,0 +1,98 @@
+.ficha-evento {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.descripcion-evento {
+  max-inline-size: 65ch;
+  color: var(--color-texto-secundario);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.distintivo-estado {
+  background: var(--color-cancelada-suave);
+  color: var(--color-cancelada);
+}
+
+.estado-proximo {
+  background: var(--color-confirmada-suave);
+  color: var(--color-confirmada);
+}
+
+.distintivo-tipo {
+  color: var(--color-texto-secundario);
+  padding-inline: 0;
+  font-size: 0.6875rem;
+  line-height: 0.875rem;
+}
+
+.datos-evento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+}
+
+.datos-evento dt {
+  margin-bottom: 0.25rem;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.datos-evento dd {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.datos-evento > div:first-child dd {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.datos-evento dd.horario-evento,
+.conteo-evento {
+  font-family: 'Spline Sans Mono', monospace;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.seccion-inscritos {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.titulo-inscritos {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+@media (min-width: 576px) {
+  .datos-evento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 992px) {
+  .datos-evento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (pointer: fine) {
+  .boton-eventos {
+    min-block-size: 2.25rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}

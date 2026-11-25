@@ -1,0 +1,69 @@
+.tabla-eventos .table {
+  min-inline-size: 46.5rem;
+}
+
+.titulo-evento {
+  min-inline-size: 11rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.titulo-evento a {
+  color: var(--color-texto);
+  text-decoration: none;
+}
+
+.titulo-evento a:is(:hover, :focus-visible) {
+  color: var(--color-principal);
+  text-decoration: underline;
+}
+
+.dato-mono {
+  font-family: 'Spline Sans Mono', monospace;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.dato-mono .badge {
+  font-family: var(--bs-body-font-family);
+}
+
+.accion-evento {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  color: var(--color-texto-secundario);
+}
+
+.accion-evento:hover {
+  background: var(--color-superficie-suave);
+  color: var(--color-principal);
+}
+
+.accion-peligro:hover {
+  background: var(--color-error-suave);
+  color: var(--color-error);
+}
+
+.accion-peligro[aria-disabled='true'] {
+  opacity: 0.6;
+}
+
+.accion-evento svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (pointer: coarse) {
+  .accion-evento {
+    width: 3rem;
+    height: 3rem;
+  }
+}

@@ -1,0 +1,24 @@
+.fecha-inscripcion {
+  font-family: 'Spline Sans Mono', monospace;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+th[scope='row'] a {
+  color: var(--color-principal);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+th[scope='row'] a:is(:hover, :focus-visible) {
+  color: var(--color-principal-hover);
+  text-decoration: underline;
+}
+
+.estado-inscripcion {
+  padding: 0.125rem 0.625rem;
+  border-radius: 50rem;
+  font-size: 0.6875rem;
+  line-height: 0.875rem;
+  letter-spacing: 0.01875rem;
+}

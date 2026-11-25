@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  --espacio-administracion: clamp(1rem, 3vw, 2rem);
+  margin-top: calc(-1 * var(--espacio-administracion));
+  margin-inline: calc(-1 * var(--espacio-administracion));
+  margin-bottom: var(--espacio-administracion);
+}
+
+.barra-volver {
+  padding-inline: var(--espacio-administracion);
+  border-bottom: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+}
+
+.barra-volver a {
+  display: inline-flex;
+  min-block-size: 3.125rem;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-texto-secundario);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.barra-volver a:is(:hover, :focus-visible) {
+  color: var(--color-principal);
+  text-decoration: underline;
+}
+
+.barra-volver svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+@media (max-width: 991.98px) {
+  :host {
+    --espacio-administracion: 1rem;
+  }
+}

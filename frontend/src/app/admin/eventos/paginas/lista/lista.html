@@ -1,0 +1,55 @@
+<div class="pagina-eventos">
+  <header class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-end gap-3">
+    <div class="d-grid gap-1">
+      <h1 class="titulo-pagina">Eventos</h1>
+      <p class="subtitulo-pagina">Programa actividades académicas, asigna ponentes y controla cupos.</p>
+    </div>
+    <a #nuevoEvento class="btn btn-principal boton-eventos d-inline-flex align-items-center justify-content-center gap-2" routerLink="/admin/eventos/nuevo">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Nuevo evento
+    </a>
+  </header>
+
+  @if (cargando()) {
+    <p class="card mensaje-eventos" role="status">Cargando eventos…</p>
+  } @else if (error()) {
+    <div class="alert alert-danger mensaje-eventos">
+      <p class="mb-2" role="alert">{{ error() }}</p>
+      <button class="btn btn-reintentar" type="button" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else {
+    <app-indicadores-eventos [proximos]="indicadores().proximos" [ocupacion]="indicadores().ocupacion" [disponibles]="indicadores().disponibles"></app-indicadores-eventos>
+
+    <search class="card" aria-label="Filtros de eventos">
+      <div class="card-body">
+        <div class="row align-items-end g-3">
+          <div class="col-md-8 campo-filtro">
+            <label for="buscar-eventos">Buscar por título</label>
+            <div class="busqueda-eventos">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
+              <input #campoBusqueda id="buscar-eventos" name="busqueda" class="form-control" type="search" placeholder="Ej. Arquitectura Cloud, Ciberseguridad…" [value]="busqueda()" (input)="busqueda.set(campoBusqueda.value)">
+            </div>
+          </div>
+
+          <div class="col-md-4 campo-filtro">
+            <label for="tipo-eventos">Filtrar por tipo</label>
+            <select #campoTipo id="tipo-eventos" name="tipo" class="form-select" (change)="tipoSeleccionado.set(campoTipo.value)">
+              <option value="" [selected]="!tipoSeleccionado()">Todos los tipos</option>
+              @for (tipo of tipos(); track tipo[0]) {
+                <option [value]="tipo[0]" [selected]="tipoSeleccionado() === tipo[0]">{{ tipo[1] }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+    </search>
+
+    @if (!eventos().length) {
+      <p class="card mensaje-eventos" role="status">Todavía no hay eventos registrados.</p>
+    } @else if (!eventosFiltrados().length) {
+      <p class="card mensaje-eventos" role="status">No hay eventos que coincidan con los filtros.</p>
+    } @else {
+      <app-tabla-eventos [eventos]="eventosFiltrados()" [nombresPonentes]="nombresPonentes()" [eliminando]="eliminando()" (eliminar)="solicitarEliminar($event)"></app-tabla-eventos>
+    }
+  }
+</div>

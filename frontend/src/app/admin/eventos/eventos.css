@@ -1,0 +1,72 @@
+.pagina-eventos {
+  --radio-superficie-eventos: 0.75rem;
+  --color-borde-campo-eventos: #918487;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  max-inline-size: 80rem;
+  min-inline-size: 0;
+  margin-inline: auto;
+}
+
+.pagina-eventos .card {
+  border-radius: var(--radio-superficie-eventos);
+}
+
+.titulo-pagina {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1875;
+  letter-spacing: -0.015625rem;
+  overflow-wrap: anywhere;
+}
+
+.subtitulo-pagina {
+  margin: 0;
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+}
+
+.boton-eventos {
+  min-block-size: 2.5rem;
+  padding: 0.5625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.btn-principal.boton-eventos {
+  border-color: var(--color-principal);
+  background: var(--color-principal);
+}
+
+.btn-principal.boton-eventos:is(:hover, :focus-visible, :active) {
+  border-color: var(--color-principal-hover);
+  background: var(--color-principal-hover);
+}
+
+.btn-secundario.boton-eventos {
+  color: var(--color-texto);
+}
+
+.btn-secundario.boton-eventos:is(:hover, :focus-visible, :active) {
+  background: var(--color-superficie-suave);
+}
+
+.boton-eventos svg {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+.mensaje-eventos {
+  margin: 0;
+  padding: 1rem;
+}
+
+@media (pointer: coarse) {
+  .boton-eventos {
+    min-block-size: 3rem;
+  }
+}
