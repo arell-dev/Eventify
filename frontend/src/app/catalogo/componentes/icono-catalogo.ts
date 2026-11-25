@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 
 type Icono = 'acceso' | 'volver' | 'buscar' | 'hora' | 'lugar' | 'video' | 'ponente'
-  | 'desplegar' | 'administracion' | 'salir';
+  | 'desplegar' | 'administracion' | 'salir' | 'campana' | 'cerrar';
 
 @Component({
   selector: 'app-icono-catalogo',
@@ -52,6 +52,12 @@ type Icono = 'acceso' | 'volver' | 'buscar' | 'hora' | 'lugar' | 'video' | 'pone
         }
         @case ('salir') {
           <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4m-1-8h11m-4-4 4 4-4 4"/>
+        }
+        @case ('campana') {
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 9h18c0-1-3-2-3-9m-8 12a2 2 0 0 0 4 0"/>
+        }
+        @case ('cerrar') {
+          <path d="m6 6 12 12M18 6 6 18"/>
         }
       }
     </svg>
