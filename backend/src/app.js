@@ -5,11 +5,9 @@ const { randomBytes } = require("node:crypto");
 const { requiereAdministrador } = require("./comun/acceso-administrativo");
 const { almacen: almacenCompartido } = require("./comun/almacen");
 const { crearRouter: crearRouterInscripciones } = require("./modulos/inscripciones/inscripciones.rutas");
-const {
-  crearRouterEventos,
-  crearRouterParticipantes
-} = require("./modulos/recursos-administrativos/recursos-administrativos.rutas");
+const { crearRouterEventos, crearRouterParticipantes } = require("./modulos/recursos-administrativos/recursos-administrativos.rutas");
 const { crearRouter: crearRouterSesion } = require("./modulos/sesion/sesion.rutas");
+const { crearRouter: crearRouterUsuarios } = require("./modulos/sesion/usuarios.rutas");
 
 const crearApp = (opciones = {}) => {
   const app = express();
@@ -21,7 +19,7 @@ const crearApp = (opciones = {}) => {
   app.use(express.json());
   app.use(session({
     name: "eventify.sid",
-    secret: opciones.secretoSesion || process.env.SESSION_SECRET || randomBytes(32).toString("hex"),
+    secret: opciones.secretoSesion || randomBytes(32).toString("hex"),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -36,12 +34,13 @@ const crearApp = (opciones = {}) => {
     respuesta.status(200).json({ estado: "ok" });
   });
 
-  app.use("/api/sesion", crearRouterSesion({
-    usuarioAdmin: opciones.usuarioAdmin,
-    contrasenaAdmin: opciones.contrasenaAdmin
-  }));
+  app.use("/api/sesion", crearRouterSesion({ almacen }));
+  app.use("/api/usuarios", requiereAdministradorConfigurado, crearRouterUsuarios(opcionesCatalogos));
+
   app.use("/api/eventos", requiereAdministradorConfigurado, crearRouterEventos(opcionesCatalogos));
+
   app.use("/api/participantes", requiereAdministradorConfigurado, crearRouterParticipantes(opcionesCatalogos));
+
   app.use("/api/inscripciones", crearRouterInscripciones({
     almacen,
     requiereSesion: requiereAdministradorConfigurado

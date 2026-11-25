@@ -6,17 +6,26 @@ const path = require("node:path");
 const { crearApp } = require("../src/app");
 const { requiereAdministrador } = require("../src/comun/acceso-administrativo");
 const { crearAlmacen } = require("../src/comun/almacen");
+const { protegerContrasena } = require("../src/comun/usuarios");
 
 const prepararAplicacion = async (contexto) => {
   const directorio = await fs.mkdtemp(path.join(os.tmpdir(), "eventify-app-"));
   const almacen = crearAlmacen({
-    rutaDatos: path.join(directorio, "eventify.json"),
-    rutaSemilla: path.resolve(__dirname, "../src/datos/data.json")
+    rutaDatos: path.join(directorio, "eventify.json")
+  });
+  await almacen.transaccion((datos) => {
+    datos.usuarios.push({
+      id: datos.siguientesIds.usuarios++,
+      nombre: "Administrador de prueba",
+      correo: "admin@eventify.test",
+      carrera: "",
+      especialidad: "",
+      rol: "ADMIN",
+      contrasenaHash: protegerContrasena("contraseña-de-prueba")
+    });
   });
   const app = crearApp({
     almacen,
-    usuarioAdmin: "admin@eventify.test",
-    contrasenaAdmin: "contraseña-de-prueba",
     secretoSesion: "secreto-de-prueba-con-longitud-suficiente"
   });
   const servidor = app.listen(0);

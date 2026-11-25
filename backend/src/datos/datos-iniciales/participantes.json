@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "nombre": "María López",
+    "correo": "maria.lopez@utp.edu.pe",
+    "carrera": "Ingeniería de Sistemas",
+    "usuarioId": 2
+  },
+  {
+    "id": 2,
+    "nombre": "Carlos Torres",
+    "correo": "carlos.torres@utp.edu.pe",
+    "carrera": "Ingeniería Industrial",
+    "usuarioId": 3
+  },
+  {
+    "id": 3,
+    "nombre": "Lucía Ramírez",
+    "correo": "lucia.ramirez@utp.edu.pe",
+    "carrera": "Administración de Empresas",
+    "usuarioId": 4
+  }
+]

@@ -12,28 +12,55 @@ const crearSemillaPrueba = () => {
   const fin = new Date(new Date(inicio).getTime() + 2 * 60 * 60 * 1000).toISOString();
 
   return {
-    ponentes: [{
-      id: 1,
-      nombre: "Ponente de prueba",
-      correo: "ponente@example.com",
-      especialidad: "Web" }
+    usuarios: [
+      {
+        id: 1,
+        nombre: "Ponente de prueba",
+        correo: "ponente@example.com",
+        carrera: "",
+        especialidad: "Web",
+        rol: "USUARIO",
+        contrasena: "prueba123"
+      },
+      {
+        id: 2,
+        nombre: "Participante Uno",
+        correo: "uno@example.com",
+        carrera: "Sistemas",
+        especialidad: "",
+        rol: "USUARIO",
+        contrasena: "prueba123"
+      },
+      {
+        id: 3,
+        nombre: "Participante Dos",
+        correo: "dos@example.com",
+        carrera: "Industrial",
+        especialidad: "",
+        rol: "USUARIO",
+        contrasena: "prueba123"
+      }
+    ],
+    ponentes: [
+      {
+        id: 1,
+        nombre: "Ponente de prueba",
+        correo: "ponente@example.com",
+        especialidad: "Web"
+      }
     ],
     participantes: [
       {
         id: 1,
         nombre: "Participante Uno",
-        correo:
-        "uno@example.com",
+        correo: "uno@example.com",
         carrera: "Sistemas"
-
       },
       {
         id: 2,
         nombre: "Participante Dos",
-        correo:
-        "dos@example.com",
+        correo: "dos@example.com",
         carrera: "Industrial"
-
       }
     ],
     eventos: [

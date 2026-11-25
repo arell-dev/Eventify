@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nombre": "Andrea Salazar",
+    "correo": "andrea.salazar@utp.edu.pe",
+    "especialidad": "Desarrollo web",
+    "usuarioId": 5
+  },
+  {
+    "id": 2,
+    "nombre": "Diego Mendoza",
+    "correo": "diego.mendoza@utp.edu.pe",
+    "especialidad": "Inteligencia artificial",
+    "usuarioId": 6
+  }
+]
