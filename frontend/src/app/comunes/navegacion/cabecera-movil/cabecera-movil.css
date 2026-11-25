@@ -1,0 +1,31 @@
+.cabecera-movil {
+  min-height: 3.75rem;
+  border-bottom: 1px solid var(--color-borde);
+  background-color: var(--color-superficie);
+}
+
+.boton-menu {
+  display: grid;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  flex: none;
+  place-items: center;
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.boton-menu:hover {
+  background-color: var(--color-superficie-suave);
+}
+
+.boton-menu:focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.titulo-cabecera {
+  color: var(--color-texto-secundario);
+  font-size: 0.875rem;
+  font-weight: 600;
+}

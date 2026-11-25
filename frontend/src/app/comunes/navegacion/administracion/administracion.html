@@ -1,7 +1,13 @@
 <div class="estructura-administracion">
   <a class="salto-contenido" href="#contenido-principal">Saltar al contenido</a>
-  <app-menu-administracion></app-menu-administracion>
-  <main id="contenido-principal" class="contenido-administracion" tabindex="-1">
+  <app-cabecera-movil class="cabecera-administracion d-lg-none" [menuAbierto]="menuAbierto()" (menuSolicitado)="abrirMenu()"></app-cabecera-movil>
+  <aside #menuEscritorio class="barra-administracion d-none d-lg-flex flex-column" aria-label="Administración de Eventos UTP">
+    <app-contenido-menu class="flex-grow-1" [usuario]="usuario()" [cerrandoSesion]="cerrandoSesion()" (salidaSolicitada)="cerrarSesion()"></app-contenido-menu>
+  </aside>
+  <app-panel-movil (cerrado)="alCerrarMenu()">
+    <app-contenido-menu class="flex-grow-1" [usuario]="usuario()" [cerrandoSesion]="cerrandoSesion()" (enlaceSeleccionado)="panelMovil().cerrar()" (salidaSolicitada)="cerrarSesion()"></app-contenido-menu>
+  </app-panel-movil>
+  <main #contenidoPrincipal id="contenido-principal" class="contenido-administracion" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
 </div>
