@@ -52,49 +52,76 @@
     }
 
     @case ('listo') {
-      @if (!resultado().eventos.length) {
+      @if (errorInscripciones()) {
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <p class="mb-0 texto-secundario" role="status">No se pudieron consultar tus inscripciones.</p>
+          <button class="btn btn-secundario" type="button" (click)="cargar()">Reintentar</button>
+        </div>
+      }
+
+      @if (comprobandoSesion() || consultandoInscripciones()) {
+        <p class="mb-0 texto-secundario" role="status">Cargando catálogo…</p>
+      } @else if (!resultado().eventos.length) {
         <p class="card panel-catalogo p-4 mb-0 texto-secundario" role="status">Todavía no hay eventos publicados.</p>
-      } @else if (!tarjetas().length) {
+      } @else if (!tarjetas().length && grupos().length === 1) {
         <p class="card panel-catalogo p-4 mb-0 texto-secundario" role="status">No hay eventos que coincidan con los filtros.</p>
       } @else {
-        <section class="row row-cols-1 row-cols-md-2 g-4 tarjetas-catalogo" aria-label="Listado de eventos">
-          @for (tarjeta of tarjetas(); track tarjeta.evento.id) {
-            @let evento = tarjeta.evento;
-            @let admiteInscripcion = tarjeta.estado === 'PROXIMO';
+        @for (grupo of grupos(); track grupo.titulo) {
+          <section class="d-flex flex-column gap-3" [attr.aria-label]="grupo.titulo">
+            @if (grupo.personal) {
+              <h2 #tituloInscripciones class="h5 mb-0" tabindex="-1">{{ grupo.titulo }}</h2>
+            } @else {
+              <h2 class="h5 mb-0" [class.visually-hidden]="!grupo.mostrarTitulo">{{ grupo.titulo }}</h2>
+            }
 
-            <div class="col">
-              <article class="card panel-catalogo h-100 p-4 d-flex flex-column justify-content-between gap-3">
-                <div class="d-flex flex-column gap-2">
-                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <span class="badge insignia-catalogo" [attr.data-modalidad]="evento.modalidad">{{ nombresModalidad[evento.modalidad] }}</span>
-                    <span class="badge insignia-catalogo" [attr.data-estado]="tarjeta.estado">{{ nombresEstado[tarjeta.estado] }}</span>
+            @if (!grupo.tarjetas.length) {
+              <p class="mb-0 texto-secundario">{{ grupo.personal ? 'No hay inscripciones confirmadas que coincidan con los filtros.' : 'No hay otros eventos que coincidan con los filtros.' }}</p>
+            } @else {
+              <div class="row row-cols-1 row-cols-md-2 g-4 tarjetas-catalogo">
+                @for (tarjeta of grupo.tarjetas; track tarjeta.evento.id) {
+                  @let evento = tarjeta.evento;
+                  @let admiteInscripcion = !errorInscripciones() && !grupo.personal && tarjeta.estado === 'PROXIMO';
+
+                  <div class="col">
+                    <article class="card panel-catalogo h-100 p-4 d-flex flex-column justify-content-between gap-3">
+                      <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                          <span class="badge insignia-catalogo" [attr.data-modalidad]="evento.modalidad">{{ nombresModalidad[evento.modalidad] }}</span>
+                          <span class="badge insignia-catalogo" [attr.data-estado]="tarjeta.estado">{{ nombresEstado[tarjeta.estado] }}</span>
+                        </div>
+
+                        <h3 class="titulo-tarjeta mb-0">{{ evento.titulo }}</h3>
+                        <p class="resumen-tarjeta texto-secundario mb-0">Ponente: {{ evento.nombrePonente }}</p>
+
+                        <div class="resumen-tarjeta texto-secundario d-flex flex-column gap-1 pt-1">
+                          <div class="d-flex align-items-start gap-1">
+                            <app-icono-catalogo nombre="hora"/>
+                            <time class="dato-monospaciado" [attr.datetime]="evento.inicio">{{ fechaDia(evento.inicio) }} · {{ horarioEvento(evento.inicio, evento.fin) }}</time>
+                          </div>
+
+                          <div class="d-flex align-items-start gap-1">
+                            <app-icono-catalogo [nombre]="evento.modalidad === 'VIRTUAL' ? 'video' : 'lugar'"/>
+                            <span>{{ ubicacionEvento(evento) }}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <footer class="d-flex align-items-center justify-content-between flex-wrap gap-2 border-top pt-3">
+                        <strong class="numero-cupos" [class.cupos-agotados]="evento.cuposDisponibles === 0">{{ textoCupos(evento.cuposDisponibles) }}</strong>
+                        <a class="btn boton-tarjeta px-3 py-2" [class.btn-principal]="admiteInscripcion" [class.boton-publico-primario]="admiteInscripcion" [class.btn-secundario]="!admiteInscripcion" [routerLink]="['/eventos', evento.id]">{{ admiteInscripcion ? 'Inscribirme' : 'Ver detalle' }}</a>
+                        @if (grupo.personal && tarjeta.cancelable) {
+                          <button #origen class="btn btn-peligro-secundario boton-tarjeta px-3 py-2" type="button" [attr.aria-label]="'Cancelar inscripción a ' + evento.titulo" [attr.aria-disabled]="eventoEnProceso() !== null" (click)="cancelarInscripcion(evento, origen)">{{ eventoEnProceso() === evento.id ? 'Cancelando…' : 'Cancelar inscripción' }}</button>
+                        }
+                      </footer>
+                    </article>
                   </div>
-
-                  <h2 class="titulo-tarjeta mb-0">{{ evento.titulo }}</h2>
-                  <p class="resumen-tarjeta texto-secundario mb-0">Ponente: {{ evento.nombrePonente }}</p>
-
-                  <div class="resumen-tarjeta texto-secundario d-flex flex-column gap-1 pt-1">
-                    <div class="d-flex align-items-start gap-1">
-                      <app-icono-catalogo nombre="hora"/>
-                      <time class="dato-monospaciado" [attr.datetime]="evento.inicio">{{ fechaDia(evento.inicio) }} · {{ horarioEvento(evento.inicio, evento.fin) }}</time>
-                    </div>
-
-                    <div class="d-flex align-items-start gap-1">
-                      <app-icono-catalogo [nombre]="evento.modalidad === 'VIRTUAL' ? 'video' : 'lugar'"/>
-                      <span>{{ ubicacionEvento(evento) }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <footer class="d-flex align-items-center justify-content-between flex-wrap gap-2 border-top pt-3">
-                  <strong class="numero-cupos" [class.cupos-agotados]="evento.cuposDisponibles === 0">{{ textoCupos(evento.cuposDisponibles) }}</strong>
-                  <a class="btn boton-tarjeta px-3 py-2" [class.btn-principal]="admiteInscripcion" [class.boton-publico-primario]="admiteInscripcion" [class.btn-secundario]="!admiteInscripcion" [routerLink]="['/eventos', evento.id]">{{ admiteInscripcion ? 'Inscribirme' : 'Ver detalle' }}</a>
-                </footer>
-              </article>
-            </div>
-          }
-        </section>
+                }
+              </div>
+            }
+          </section>
+        }
       }
     }
   }
 </main>
+<app-confirmacion-inscripcion-dialog/>

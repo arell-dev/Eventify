@@ -1,6 +1,8 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
+import { startWith, switchMap } from 'rxjs';
+import { CambiosInscripcionesService } from '../../../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../../../comunes/notificaciones/notificaciones.service';
 import { AccesosModulosComponent } from '../../componentes/accesos-modulos/accesos-modulos.component';
 import { IndicadoresInicioComponent } from '../../componentes/indicadores/indicadores.component';
@@ -18,6 +20,7 @@ import { InicioService } from '../../servicios/inicio.service';
 
 export class InicioPanelComponent implements OnInit {
   private readonly inicio = inject(InicioService);
+  private readonly cambios = inject(CambiosInscripcionesService);
   private readonly notificaciones = inject(NotificacionesService);
   private readonly router = inject(Router);
   private readonly destruir = inject(DestroyRef);
@@ -79,8 +82,8 @@ export class InicioPanelComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.inicio.consultar()
-      .pipe(takeUntilDestroyed(this.destruir))
+    this.cambios.cambios
+      .pipe(startWith(undefined), switchMap(() => this.inicio.consultar()), takeUntilDestroyed(this.destruir))
       .subscribe((datos) => this.aplicarDatos(datos));
   }
 
@@ -95,7 +98,11 @@ export class InicioPanelComponent implements OnInit {
     }
 
     this.ahora.set(Date.now());
-    this.datos.set(datos);
+    this.datos.update((anteriores) => ({
+      eventos: datos.eventos.datos ? datos.eventos : anteriores?.eventos ?? datos.eventos,
+      participantes: datos.participantes.datos ? datos.participantes : anteriores?.participantes ?? datos.participantes,
+      ponentes: datos.ponentes.datos ? datos.ponentes : anteriores?.ponentes ?? datos.ponentes
+    }));
 
     if (errores.some(Boolean)) {
       this.notificaciones.mostrar('No se pudieron cargar todos los datos del panel.', 'error');

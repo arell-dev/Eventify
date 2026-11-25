@@ -1,7 +1,8 @@
 import { Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, Subscription } from 'rxjs';
+import { CambiosInscripcionesService } from '../../../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../../../comunes/notificaciones/notificaciones.service';
 import { ConfirmacionService } from '../../../inscripciones/componentes/confirmacion/confirmacion.service';
 import { IndicadoresEventosComponent } from '../../componentes/indicadores/indicadores.component';
@@ -20,11 +21,13 @@ import { etiquetaTipo, mensajeApi } from '../../utilidades/presentacion';
 
 export class EventosListaComponent implements OnInit {
   private readonly servicio = inject(EventosService);
+  private readonly cambios = inject(CambiosInscripcionesService);
   private readonly notificaciones = inject(NotificacionesService);
   private readonly confirmacion = inject(ConfirmacionService);
   private readonly destruir = inject(DestroyRef);
   private readonly nuevoEvento = viewChild<ElementRef<HTMLAnchorElement>>('nuevoEvento');
   private readonly ahora = signal(Date.now());
+  private consulta?: Subscription;
 
   protected readonly eventos = signal<Evento[]>([]);
   protected readonly nombresPonentes = signal<ReadonlyMap<number, string>>(new Map());
@@ -73,21 +76,32 @@ export class EventosListaComponent implements OnInit {
   ngOnInit(): void {
     this.destruir.onDestroy(() => this.confirmacion.resolverSolicitud(false));
     this.cargar();
+    this.cambios.cambios.pipe(takeUntilDestroyed(this.destruir)).subscribe(() => this.cargar(true));
   }
 
-  protected cargar(): void {
-    this.cargando.set(true);
-    this.error.set('');
+  protected cargar(enSegundoPlano = false): void {
+    const mostrarCarga = !enSegundoPlano || this.cargando();
+    this.consulta?.unsubscribe();
 
-    forkJoin({ eventos: this.servicio.listar(), ponentes: this.servicio.listarPonentes() })
+    if (mostrarCarga) {
+      this.cargando.set(true);
+      this.error.set('');
+    }
+
+    this.consulta = forkJoin({ eventos: this.servicio.listar(), ponentes: this.servicio.listarPonentes() })
       .pipe(takeUntilDestroyed(this.destruir), finalize(() => this.cargando.set(false)))
       .subscribe({
         next: ({ eventos, ponentes }) => {
+          this.error.set('');
           this.ahora.set(Date.now());
           this.eventos.set(eventos);
           this.nombresPonentes.set(new Map(ponentes.map((ponente) => [ponente.id, ponente.nombre])));
         },
-        error: (error) => this.error.set(mensajeApi(error, 'No se pudieron cargar los eventos.'))
+        error: (error) => {
+          if (mostrarCarga || error.status === 401 || error.status === 403) {
+            this.error.set(mensajeApi(error, 'No se pudieron cargar los eventos.'));
+          }
+        }
       });
   }
 
@@ -117,6 +131,7 @@ export class EventosListaComponent implements OnInit {
           }
 
           this.notificaciones.mostrar('El evento fue eliminado.');
+          this.cargar(true);
         },
         error: (error) => this.notificaciones.mostrar(
           mensajeApi(error, 'No se pudo eliminar el evento.'),

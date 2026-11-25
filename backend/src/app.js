@@ -4,21 +4,25 @@ const session = require("express-session");
 const { randomBytes } = require("node:crypto");
 const { requiereAdministrador } = require("./comun/acceso-administrativo");
 const { almacen: almacenCompartido } = require("./comun/almacen");
+const { crearCambiosInscripciones } = require("./modulos/inscripciones/cambios-inscripciones");
 const { crearRouter: crearRouterInscripciones } = require("./modulos/inscripciones/inscripciones.rutas");
 const { crearRouter: crearRouterEventos, crearRouterPublico } = require("./modulos/eventos/eventos.rutas");
 const { crearRouter: crearRouterParticipantes } = require("./modulos/participantes/participantes.rutas");
 const { crearRouter: crearRouterPonentes } = require("./modulos/ponentes/ponentes.rutas");
 const { crearRouter: crearRouterSesion } = require("./modulos/sesion/sesion.rutas");
 const { crearRouter: crearRouterUsuarios } = require("./modulos/sesion/usuarios.rutas");
-const { crearRouter: crearRouterInscripcionPublica, crearRouterNotificaciones } = require("./modulos/sesion/publico.rutas");
+const { crearRouter: crearRouterInscripcionPublica, crearRouterMisInscripciones, crearRouterNotificaciones } = require("./modulos/sesion/publico.rutas");
 
 const crearApp = (opciones = {}) => {
   const app = express();
   const almacen = opciones.almacen || almacenCompartido;
   const requiereAdministradorConfigurado = opciones.requiereAdministrador || requiereAdministrador;
   const opcionesCatalogos = { almacen };
+  const cambiosInscripciones = crearCambiosInscripciones();
+  const opcionesInscripciones = { almacen, publicarCambio: cambiosInscripciones.publicar };
 
   app.use(cors({ origin: "http://localhost:4200", credentials: true }));
+  app.get("/api/publico/cambios-inscripciones", cambiosInscripciones.conectar);
   app.use(express.json());
   app.use(session({
     name: "eventify.sid",
@@ -41,10 +45,10 @@ const crearApp = (opciones = {}) => {
   app.use("/api/usuarios", requiereAdministradorConfigurado, crearRouterUsuarios(opcionesCatalogos));
   
   app.use("/api/publico/eventos", crearRouterPublico(opcionesCatalogos));
-  app.use("/api/publico/eventos", crearRouterInscripcionPublica(opcionesCatalogos));
+  app.use("/api/publico/eventos", crearRouterInscripcionPublica(opcionesInscripciones));
+  app.use("/api/publico/mis-inscripciones", crearRouterMisInscripciones(opcionesCatalogos));
 
   app.use("/api/notificaciones", crearRouterNotificaciones(opcionesCatalogos));
-
 
   app.use("/api/eventos", requiereAdministradorConfigurado, crearRouterEventos(opcionesCatalogos));
   
@@ -53,7 +57,7 @@ const crearApp = (opciones = {}) => {
   app.use("/api/participantes", requiereAdministradorConfigurado, crearRouterParticipantes(opcionesCatalogos));
   
   app.use("/api/inscripciones", crearRouterInscripciones({
-    almacen,
+    ...opcionesInscripciones,
     requiereSesion: requiereAdministradorConfigurado
   }));
 

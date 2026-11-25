@@ -96,7 +96,7 @@
       <div class="col-12 columna-inscripcion">
         <aside class="card panel-catalogo panel-detalle d-flex flex-column gap-3" aria-labelledby="titulo-inscripcion">
           <div class="d-flex flex-column gap-1">
-            <h2 id="titulo-inscripcion" class="titulo-inscripcion mb-0">{{ consultaInscripcion() === 'ponente-asignado' ? 'Tu participación' : 'Inscríbete con tu cuenta' }}</h2>
+            <h2 #tituloInscripcion id="titulo-inscripcion" class="titulo-inscripcion mb-0" tabindex="-1">{{ consultaInscripcion() === 'ponente-asignado' || inscripcion() ? 'Tu participación' : 'Inscríbete con tu cuenta' }}</h2>
 
             @if (comprobandoSesion()) {
               <p class="texto-secundario mb-0" role="status">Comprobando tu sesión…</p>
@@ -141,14 +141,17 @@
                 }
 
                 @case ('lista') {
+                  @if (inscripcion()?.estado === 'CANCELADA') {
+                    <p class="texto-secundario mb-0" role="status">Tu inscripción fue cancelada.</p>
+                  }
+
                   @if (inscripcion()?.estado === 'CONFIRMADA') {
                     <p class="estado-confirmada rounded-3 px-3 py-2 mb-0 fw-semibold" role="status">Inscripción confirmada</p>
+                    @if (puedeCancelar()) {
+                      <button #origen class="btn btn-peligro-secundario boton-confirmacion" type="button" [attr.aria-disabled]="cancelando() !== null" (click)="cancelarInscripcion(origen)">{{ cancelando() !== null ? 'Cancelando…' : 'Cancelar inscripción' }}</button>
+                    }
                   } @else if (estado() === 'PROXIMO') {
                     <form class="d-flex flex-column gap-3" [formGroup]="formulario" (ngSubmit)="confirmarInscripcion()">
-                      @if (inscripcion()?.estado === 'CANCELADA') {
-                        <p class="texto-secundario mb-0">Tu inscripción anterior fue cancelada. Puedes reactivarla si hay cupos.</p>
-                      }
-
                       <div class="d-flex align-items-start gap-2">
                         <input id="confirmacion-reserva" class="form-check-input casilla-confirmacion flex-shrink-0" type="checkbox" required formControlName="confirmacion" [attr.aria-invalid]="confirmacion.dirty && confirmacion.invalid" [attr.aria-describedby]="confirmacion.dirty && confirmacion.invalid ? 'error-confirmacion' : null">
                         <label class="texto-confirmacion texto-secundario" for="confirmacion-reserva">Confirmo que mis datos de usuario son correctos y deseo reservar una vacante en este evento.</label>
@@ -158,7 +161,7 @@
                         <p id="error-confirmacion" class="texto-error mb-0" role="status">Marca la casilla para confirmar tu inscripción.</p>
                       }
 
-                      <button class="btn btn-principal boton-publico-primario boton-confirmacion" type="submit" [disabled]="confirmacion.invalid || procesando() || cargandoEvento() || !!errorEvento()">
+                      <button class="btn btn-principal boton-publico-primario boton-confirmacion" type="submit" [disabled]="confirmacion.invalid || procesando() || cancelando() !== null || cargandoEvento() || !!errorEvento()">
                         {{ procesando() ? 'Registrando…' : 'Confirmar mi inscripción' }}
                       </button>
                     </form>
@@ -191,3 +194,4 @@
     </div>
   }
 </main>
+<app-confirmacion-inscripcion-dialog/>

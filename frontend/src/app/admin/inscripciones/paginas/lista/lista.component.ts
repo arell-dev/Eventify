@@ -1,7 +1,10 @@
 import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { CambiosInscripcionesService } from '../../../../comunes/inscripciones/cambios-inscripciones.service';
 import { NotificacionesService } from '../../../../comunes/notificaciones/notificaciones.service';
 import { ConfirmacionService } from '../../componentes/confirmacion/confirmacion.service';
 import { EstadoInscripcion, EventoOpcion, Inscripcion } from '../../modelos/inscripcion.model';
@@ -18,8 +21,11 @@ import { formatearFechaInscripcion } from '../../utilidades/fecha';
 
 export class InscripcionesListaComponent implements OnInit {
   private readonly servicio = inject(InscripcionesService);
+  private readonly cambios = inject(CambiosInscripcionesService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly notificaciones = inject(NotificacionesService);
   private readonly confirmacion = inject(ConfirmacionService);
+  private consulta?: Subscription;
 
   readonly inscripciones = signal<Inscripcion[]>([]);
   readonly eventos = signal<EventoOpcion[]>([]);
@@ -63,23 +69,33 @@ export class InscripcionesListaComponent implements OnInit {
   ngOnInit(): void {
     this.cargarInscripciones();
     this.cargarEventos();
+    this.cambios.cambios.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.cargarInscripciones(true));
   }
 
   // Carga inscripciones y catálogo de eventos por separado para conservar el listado ante fallos parciales.
-  cargarInscripciones(): void {
-    this.cargando.set(true);
-    this.errorCarga.set(false);
+  cargarInscripciones(enSegundoPlano = false): void {
+    const mostrarCarga = !enSegundoPlano || this.cargando();
+    this.consulta?.unsubscribe();
 
-    this.servicio.obtenerTodas().subscribe({
+    if (mostrarCarga) {
+      this.cargando.set(true);
+      this.errorCarga.set(false);
+    }
+
+    this.consulta = this.servicio.obtenerTodas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (inscripciones) => {
         this.inscripciones.set(inscripciones);
+        this.errorCarga.set(false);
         this.cargando.set(false);
       },
       error: (error: HttpErrorResponse) => {
-        this.inscripciones.set([]);
-        this.errorCarga.set(true);
+        if (mostrarCarga || error.status === 401 || error.status === 403) {
+          this.inscripciones.set([]);
+          this.errorCarga.set(true);
+          this.notificaciones.mostrar(this.obtenerMensajeError(error), 'error');
+        }
+
         this.cargando.set(false);
-        this.notificaciones.mostrar(this.obtenerMensajeError(error), 'error');
       }
     });
   }
@@ -130,7 +146,7 @@ export class InscripcionesListaComponent implements OnInit {
           : 'La inscripción fue reactivada.';
 
         this.notificaciones.mostrar(mensaje);
-        this.cargarInscripciones();
+        this.cargarInscripciones(true);
         this.procesando.set(false);
       },
       error: (error: HttpErrorResponse) => {
@@ -159,7 +175,7 @@ export class InscripcionesListaComponent implements OnInit {
     this.servicio.eliminar(inscripcion.id).subscribe({
       next: () => {
         this.notificaciones.mostrar('La inscripción fue eliminada.');
-        this.cargarInscripciones();
+        this.cargarInscripciones(true);
         this.procesando.set(false);
       },
       error: (error: HttpErrorResponse) => {

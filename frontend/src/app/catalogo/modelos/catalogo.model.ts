@@ -20,6 +20,11 @@ export interface InscripcionPropia {
   estado: 'CONFIRMADA' | 'CANCELADA';
 }
 
+export interface CancelacionInscripcion {
+  estado: 'CANCELADA';
+  cuposDisponibles: number;
+}
+
 export interface AvisoDeCuenta {
   id: number;
   eventoId: number;

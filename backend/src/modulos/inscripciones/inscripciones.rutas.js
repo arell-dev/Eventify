@@ -1,7 +1,7 @@
 const express = require("express");
 const { almacen: almacenCompartido } = require("../../comun/almacen");
 const { requiereAdministrador } = require("../../comun/acceso-administrativo");
-const { contarConfirmadas, obtenerCuposDisponibles, representarInscripcion, verificarDisponibilidad, confirmarInscripcion } = require("./inscripciones.datos");
+const { cancelarInscripcion, confirmarInscripcion, contarConfirmadas, obtenerCuposDisponibles, representarInscripcion, verificarDisponibilidad } = require("./inscripciones.datos");
 
 // Conserva el estado HTTP esperado junto al mensaje de validación o negocio.
 class ErrorHttp extends Error {
@@ -70,13 +70,6 @@ const obtenerParticipante = (datos, participanteId) => {
   return participante;
 };
 
-// Impide cambios que dependen de disponibilidad cuando el evento ya comenzó.
-const esEventoFuturo = (evento) => {
-  const inicio = new Date(evento.inicio).getTime();
-
-  return Number.isFinite(inicio) && inicio > Date.now();
-};
-
 // Centraliza las reglas para crear o reactivar una inscripción.
 const comprobarDisponibilidad = (datos, evento) => {
   const mensaje = verificarDisponibilidad(datos, evento);
@@ -91,6 +84,7 @@ const crearRouter = (opciones = {}) => {
   const router = express.Router();
   const almacen = opciones.almacen || almacenCompartido;
   const requiereSesion = opciones.requiereSesion || requiereAdministrador;
+  const publicarCambio = opciones.publicarCambio;
 
   router.use(requiereSesion);
 
@@ -157,12 +151,15 @@ const crearRouter = (opciones = {}) => {
           throw new ErrorHttp(409, resultado.mensaje);
         }
 
-        return resultado;
+        return {
+          reactivada: resultado.reactivada,
+          inscripcion: representarInscripcion(datos, resultado.inscripcion)
+        };
       });
-      const datosActualizados = await almacen.leer();
       const estadoRespuesta = resultado.reactivada ? 200 : 201;
 
-      respuesta.status(estadoRespuesta).json(representarInscripcion(datosActualizados, resultado.inscripcion));
+      publicarCambio?.();
+      respuesta.status(estadoRespuesta).json(resultado.inscripcion);
     } catch (error) {
       responderError(error, respuesta);
     }
@@ -179,7 +176,7 @@ const crearRouter = (opciones = {}) => {
         throw new ErrorHttp(400, "El estado debe ser CONFIRMADA o CANCELADA.");
       }
 
-      const inscripcion = await almacen.transaccion((datos) => {
+      const resultado = await almacen.transaccion((datos) => {
         const registro = datos.inscripciones.find((elemento) => elemento.id === id);
 
         if (!registro) {
@@ -187,26 +184,30 @@ const crearRouter = (opciones = {}) => {
         }
 
         if (registro.estado === estadoSolicitado) {
-          return registro;
+          return { cambiada: false, inscripcion: representarInscripcion(datos, registro) };
         }
 
         const evento = obtenerEvento(datos, registro.eventoId);
 
         if (estadoSolicitado === "CANCELADA") {
-          if (!esEventoFuturo(evento)) {
-            throw new ErrorHttp(409, "No se puede cancelar una inscripción cuando el evento ya comenzó.");
+          const { mensaje } = cancelarInscripcion(evento, registro);
+
+          if (mensaje) {
+            throw new ErrorHttp(409, mensaje);
           }
         } else {
           comprobarDisponibilidad(datos, evento);
+          registro.estado = estadoSolicitado;
         }
 
-        registro.estado = estadoSolicitado;
-
-        return registro;
+        return { cambiada: true, inscripcion: representarInscripcion(datos, registro) };
       });
-      const datosActualizados = await almacen.leer();
 
-      respuesta.status(200).json(representarInscripcion(datosActualizados, inscripcion));
+      if (resultado.cambiada) {
+        publicarCambio?.();
+      }
+
+      respuesta.status(200).json(resultado.inscripcion);
     } catch (error) {
       responderError(error, respuesta);
     }
@@ -234,6 +235,7 @@ const crearRouter = (opciones = {}) => {
         return registro;
       });
 
+      publicarCambio?.();
       respuesta.status(200).json(eliminada);
     } catch (error) {
       responderError(error, respuesta);
