@@ -31,6 +31,7 @@ interface ResultadoListado {
 interface MisInscripciones {
   usuarioId: number;
   eventoIds: ReadonlySet<number>;
+  eventosComoPonenteIds: ReadonlySet<number>;
 }
 
 const normalizarBusqueda = (texto: string): string => {
@@ -89,9 +90,17 @@ export class CatalogoListaComponent {
     const { busqueda, modalidad, estado } = this.valoresFiltro();
     const termino = normalizarBusqueda(busqueda);
     const ahora = this.reloj();
+    const misInscripciones = this.misInscripciones();
+    const eventosComoPonenteIds = misInscripciones && misInscripciones.usuarioId === this.usuarioId()
+      ? misInscripciones.eventosComoPonenteIds : undefined;
 
     return this.resultado().eventos
-      .map((evento) => ({ evento, estado: estadoEvento(evento, ahora), cancelable: Date.parse(evento.inicio) > ahora }))
+      .map((evento) => ({
+        evento,
+        estado: estadoEvento(evento, ahora),
+        cancelable: Date.parse(evento.inicio) > ahora,
+        ponenteAsignado: eventosComoPonenteIds?.has(evento.id) ?? false
+      }))
       .filter((tarjeta) => {
         const { titulo, descripcion, nombrePonente } = tarjeta.evento;
         const texto = normalizarBusqueda(`${titulo} ${descripcion} ${nombrePonente}`);
@@ -146,7 +155,11 @@ export class CatalogoListaComponent {
 
         return this.actualizaciones.pipe(
           switchMap(() => this.catalogo.listarMisInscripciones().pipe(
-            map(({ eventoIds }) => ({ usuarioId, eventoIds: new Set(eventoIds) })),
+            map(({ eventoIds, eventosComoPonenteIds }) => ({
+              usuarioId,
+              eventoIds: new Set(eventoIds),
+              eventosComoPonenteIds: new Set(eventosComoPonenteIds)
+            })),
             catchError((error: HttpErrorResponse) => {
               if (this.usuarioId() === usuarioId) {
                 if (error.status === 401) {

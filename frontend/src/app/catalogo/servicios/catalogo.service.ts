@@ -21,7 +21,7 @@ export class CatalogoService {
   }
 
   listarMisInscripciones() {
-    return this.http.get<{ eventoIds: number[] }>('/api/publico/mis-inscripciones');
+    return this.http.get<{ eventoIds: number[]; eventosComoPonenteIds: number[] }>('/api/publico/mis-inscripciones');
   }
 
   confirmarInscripcion(eventoId: number) {
