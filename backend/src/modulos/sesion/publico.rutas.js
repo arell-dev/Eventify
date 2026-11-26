@@ -6,8 +6,13 @@ const conflictoPonenteAsignado = {
   mensaje: "Eres el ponente de este evento. Tu participación ya está asignada."
 };
 
+const buscarPonenteDeUsuario = (datos, usuarioId) => {
+  return datos.ponentes.find((ponente) => ponente.usuarioId === usuarioId);
+};
+
 const esPonenteAsignado = (datos, evento, usuarioId) => {
-  return datos.ponentes.some((ponente) => ponente.id === evento.ponenteId && ponente.usuarioId === usuarioId);
+  const ponente = buscarPonenteDeUsuario(datos, usuarioId);
+  return Boolean(ponente && ponente.id === evento.ponenteId);
 };
 
 const buscarParticipanteDeUsuario = (datos, usuarioId) => {
@@ -36,12 +41,17 @@ const crearRouterMisInscripciones = ({ almacen }) => {
 
     try {
       const datos = await almacen.leer();
-      const participante = buscarParticipanteDeUsuario(datos, solicitud.session.perfil.id);
+      const usuarioId = solicitud.session.perfil.id;
+      const participante = buscarParticipanteDeUsuario(datos, usuarioId);
+      const ponente = buscarPonenteDeUsuario(datos, usuarioId);
       const eventoIds = participante ? datos.inscripciones
         .filter((inscripcion) => inscripcion.participanteId === participante.id && inscripcion.estado === "CONFIRMADA")
         .map((inscripcion) => inscripcion.eventoId) : [];
+      const eventosComoPonenteIds = ponente ? datos.eventos
+        .filter((evento) => evento.ponenteId === ponente.id)
+        .map((evento) => evento.id) : [];
 
-      respuesta.json({ eventoIds });
+      respuesta.json({ eventoIds, eventosComoPonenteIds });
     } catch (error) {
       respuesta.status(500).json({ mensaje: "No se pudieron consultar tus inscripciones." });
     }

@@ -112,6 +112,12 @@ test("roles, identidad, cancelación y reserva de cupo comparten el almacén", {
   };
 
   const antesDelRechazo = await fs.readFile(rutaDatos, "utf8");
+  const listadoPonente = await listarMisInscripciones(cuentaPonente.cookie);
+  assert.equal(listadoPonente.status, 200);
+  assert.equal(listadoPonente.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await listadoPonente.json(), { eventoIds: [], eventosComoPonenteIds: [evento.id] });
+  assert.deepEqual((await (await listarMisInscripciones(usuario.cookie)).json()).eventosComoPonenteIds, []);
+  assert.equal((await (await listarMisInscripciones(usuarioPonente.cookie)).json()).eventosComoPonenteIds.includes(evento.id), false);
   await comprobarConflictoPonente(await consultarInscripcion(cuentaPonente.cookie));
   await comprobarConflictoPonente(await inscribir(cuentaPonente.cookie));
   assert.equal(await fs.readFile(rutaDatos, "utf8"), antesDelRechazo);

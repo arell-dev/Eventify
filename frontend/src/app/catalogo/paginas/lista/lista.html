@@ -80,7 +80,7 @@
               <div class="row row-cols-1 row-cols-md-2 g-4 tarjetas-catalogo">
                 @for (tarjeta of grupo.tarjetas; track tarjeta.evento.id) {
                   @let evento = tarjeta.evento;
-                  @let admiteInscripcion = !errorInscripciones() && !grupo.personal && tarjeta.estado === 'PROXIMO';
+                  @let admiteInscripcion = !errorInscripciones() && !grupo.personal && !tarjeta.ponenteAsignado && tarjeta.estado === 'PROXIMO';
 
                   <div class="col">
                     <article class="card panel-catalogo h-100 p-4 d-flex flex-column justify-content-between gap-3">
@@ -91,7 +91,7 @@
                         </div>
 
                         <h3 class="titulo-tarjeta mb-0">{{ evento.titulo }}</h3>
-                        <p class="resumen-tarjeta texto-secundario mb-0">Ponente: {{ evento.nombrePonente }}</p>
+                        <p class="resumen-tarjeta texto-secundario mb-0">{{ tarjeta.ponenteAsignado ? 'Eres el ponente de este evento' : 'Ponente: ' + evento.nombrePonente }}</p>
 
                         <div class="resumen-tarjeta texto-secundario d-flex flex-column gap-1 pt-1">
                           <div class="d-flex align-items-start gap-1">
